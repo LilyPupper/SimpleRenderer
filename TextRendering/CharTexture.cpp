@@ -7,11 +7,11 @@ CharTexture_Accessor::CharTexture_Accessor(const CharTexture* _owner)
 	: m_Owner(_owner)
 {}
 
-int& CharTexture_Accessor::operator[](const unsigned int& _index)
+PixelData& CharTexture_Accessor::operator[](const unsigned int& _index)
 {
 	assert(_index < m_Owner->m_Height && "_index out of range!");
 
-	return *(reinterpret_cast<int*>(this->m_Texture) + (_index * m_Owner->m_Width));
+	return *(reinterpret_cast<PixelData*>(this->m_Texture) + (_index * m_Owner->m_Width));
 }
 
 //////////////////////////////////////////////////
@@ -19,7 +19,7 @@ int& CharTexture_Accessor::operator[](const unsigned int& _index)
 CharTexture::CharTexture(const unsigned int& _width, const unsigned int& _height)
 	: m_Width(_width), m_Height(_height), m_Length(_width * _height), m_Accessor(this)
 {
-	m_Texture = new int[m_Length];
+	m_Texture = new PixelData[m_Length];
 	Clear();
 }
 
@@ -31,7 +31,7 @@ CharTexture::~CharTexture()
 void CharTexture::Clear()
 {
 	for (unsigned int i = 0; i < m_Length; ++i)
-		m_Texture[i] = 0;
+		m_Texture[i].Data = 0;
 }
 
 void CharTexture::Debug()
@@ -40,7 +40,7 @@ void CharTexture::Debug()
 	{
 		for (unsigned int j = 0; j < m_Width; ++j)
 		{
-			std::cout << (*this)[j][i] << ", ";
+			std::cout << (*this)[j][i].Data << ", ";
 		}
 		std::cout << std::endl;
 	}

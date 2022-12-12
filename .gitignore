@@ -1,6 +1,7 @@
 # Directories
 .vs/
 Debug/
+TextRendering/Debug/
 
 # Files
 *.user

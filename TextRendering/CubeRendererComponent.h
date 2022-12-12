@@ -4,6 +4,11 @@
 
 #include "Mat3.h"
 #include "Vec3.h"
+#include "Tri.h"
+
+#include <vector>
+
+class CharTexture;
 
 class CubeRendererComponent : public Component
 {
@@ -12,25 +17,16 @@ public:
 	~CubeRendererComponent();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render();
+	virtual void Render(CharTexture* _texture);
 
 private:
-	// Rendering
-	Mat3 projection = Mat3::Identity();
+	Mat3 m_Projection;
+	Vec3 m_RotAngles;
+	float m_Scale;
 
-	// Rotations
-	float angleX = 0.f;
-	float angleY = 0.f;
-	float angleZ = 0.f;
-
-	float angleXIncrease = 1.5f;
-	float angleYIncrease = 0.75f;
-	float angleZIncrease = 0.5f;
-
-	float scale = 1.f;
-
-	float scaleIncrease = 0.f;
+	float m_Time;
 
 	// 3D Objects to be rendered
-	Vec3* cube[8];
+	std::vector<Vec3> m_Vertices;
+	std::vector<Tri> m_Triangles;
 };

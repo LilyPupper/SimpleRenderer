@@ -60,6 +60,12 @@
     <ClInclude Include="CubeRendererComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Tri.h">
+      <Filter>Header Files\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -91,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="CubeRendererComponent.cpp">
       <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Tri.cpp">
+      <Filter>Source Files\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

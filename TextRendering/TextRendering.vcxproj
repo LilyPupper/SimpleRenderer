@@ -89,9 +89,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,8 +148,10 @@
     <ClInclude Include="CubeRendererComponent.h" />
     <ClInclude Include="Mat3.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="RotatingCube.h" />
     <ClInclude Include="TransformComponent.h" />
+    <ClInclude Include="Tri.h" />
     <ClInclude Include="Vec3.h" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +164,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="RotatingCube.cpp" />
     <ClCompile Include="TransformComponent.cpp" />
+    <ClCompile Include="Tri.cpp" />
     <ClCompile Include="Vec3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

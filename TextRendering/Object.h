@@ -5,6 +5,8 @@
 
 class Object;
 class Component;
+class CharTexture;
+class TransformComponent;
 enum COMPONENT_TYPE;
 
 typedef std::map<const unsigned int, Object*> OBJECT_MAP;
@@ -16,11 +18,13 @@ public:
 	~Object();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render();
+	virtual void Render(CharTexture*  _texture);
 
 	void AddComponent(Component* _component);
 	Component* FindComponentOfType(COMPONENT_TYPE _type);
 	Component* operator[](COMPONENT_TYPE _type);
+
+	inline TransformComponent* GetTransform() { return m_Transform; }
 
 	unsigned int GetObjectID();
 
@@ -29,6 +33,8 @@ public:
 private:
 	unsigned int m_ObjectID;
 	std::vector<Component*> m_Components;
+
+	TransformComponent* m_Transform;
 
 	static unsigned int s_ObjectIDCount;
 	static OBJECT_MAP s_ObjectList;

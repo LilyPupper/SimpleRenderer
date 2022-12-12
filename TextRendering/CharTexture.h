@@ -1,5 +1,12 @@
 #pragma once
 
+struct PixelData
+{
+	int Data;
+};
+
+//////////////////////////////////////////////////
+
 class CharTexture_Accessor
 {
 	friend class CharTexture;
@@ -7,11 +14,11 @@ private:
 	CharTexture_Accessor(const CharTexture* _owner);
 	~CharTexture_Accessor() = default;
 
-	int* m_Texture;
+	PixelData* m_Texture;
 	const CharTexture* m_Owner;
 
 public:
-	int& operator[](const unsigned int& _index);
+	PixelData& operator[](const unsigned int& _index);
 };
 
 //////////////////////////////////////////////////
@@ -35,7 +42,7 @@ public:
 private:
 	unsigned int m_Width, m_Height;
 	unsigned int m_Length;
-	int* m_Texture;
+	PixelData* m_Texture;
 
 	CharTexture_Accessor m_Accessor;
 };

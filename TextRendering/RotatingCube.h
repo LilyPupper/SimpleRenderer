@@ -2,6 +2,8 @@
 
 #include "Object.h"
 
+class CharTexture;
+
 class RotatingCube : public Object
 {
 public:
@@ -9,5 +11,5 @@ public:
 	~RotatingCube();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render();
+	virtual void Render(CharTexture* _texture);
 };

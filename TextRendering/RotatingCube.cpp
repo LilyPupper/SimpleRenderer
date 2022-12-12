@@ -16,7 +16,7 @@ void RotatingCube::Update(const float& _deltaTime)
 	Object::Update(_deltaTime);
 }
 
-void RotatingCube::Render()
+void RotatingCube::Render(CharTexture* _texture)
 {
-	Object::Render();
+	Object::Render(_texture);
 }

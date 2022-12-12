@@ -2,18 +2,20 @@
 
 #include "Component.h"
 #include "TransformComponent.h"
+#include "CharTexture.h"
 
 unsigned int Object::s_ObjectIDCount = 0;
 OBJECT_MAP Object::s_ObjectList;
 
 Object::Object()
+	: m_Transform(new TransformComponent(this))
 {
 	m_ObjectID = s_ObjectIDCount;
 	++s_ObjectIDCount;
 
 	s_ObjectList.insert(std::pair<const unsigned int, Object*>(m_ObjectID, this));
 
-	AddComponent(new TransformComponent(this));
+	AddComponent(m_Transform);
 }
 
 Object::~Object()
@@ -27,11 +29,11 @@ void Object::Update(const float& _deltaTime)
 	}
 }
 
-void Object::Render()
+void Object::Render(CharTexture* _texture)
 {
 	for (unsigned int i = 0; i < m_Components.size(); ++i)
 	{
-		m_Components[i]->Render();
+		m_Components[i]->Render(_texture);
 	}
 }
 

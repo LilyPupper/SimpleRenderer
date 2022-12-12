@@ -11,7 +11,7 @@ public:
 	~TransformComponent();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render();
+	virtual void Render(CharTexture* _texture);
 
 	Vec3 m_Position;
 };

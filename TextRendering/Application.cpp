@@ -3,18 +3,34 @@
 #include "Component.h"
 #include "RotatingCube.h"
 
-#include <time.h>
 #include <iostream>
-#include <cassert>
-
-Application* Application::INSTANCE;
+#include <time.h>
+#include <stdio.h>
+#include <conio.h>
 
 Application::Application(const int& _width, const int& _height)
 	: m_RenderTex(_width, _height)
 {
-	assert(!INSTANCE && "Application::INSTANCE already exists!");
+	// Set console size
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SMALL_RECT rect = { 0, 0, _width, _height };
+	SetConsoleWindowInfo(hConsole, TRUE, &rect);
 
-	INSTANCE = this;
+	// Create Screen Buffer
+	m_ScreenBuffer = new wchar_t[_width * _height];
+	std::fill_n(m_ScreenBuffer, _width * _height, L'a');
+
+	m_Console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	if (m_Console == INVALID_HANDLE_VALUE)
+	{
+		std::cerr << "CreateConsoleScreenBuffer win error: " << GetLastError() << '\n';
+		m_Running = false;
+	}
+	if (!SetConsoleActiveScreenBuffer(m_Console))
+	{
+		std::cerr << "CreateConsoleScreenBuffer win error: " << GetLastError() << '\n';
+		m_Running = false;
+	}
 
 	// Add objects here
 	m_Objects.push_back(new RotatingCube());
@@ -26,58 +42,72 @@ Application::~Application()
 	{
 		delete m_Objects[i];
 	}
+
+	delete m_ScreenBuffer;
+}
+
+void Application::WriteToScreen(int _row, int _col, wchar_t _char)
+{
+	m_ScreenBuffer[_row * m_RenderTex.GetWidth() + _col] = _char;
+}
+
+void Application::WriteToScreen(int _row, int _col, const std::wstring& _s)
+{
+	swprintf(&m_ScreenBuffer[_row * m_RenderTex.GetWidth() + _col], _s.size() + 1, L"%s", _s.c_str());
 }
 
 void Application::Run()
 {
 	// Time
 	const clock_t start_time = clock();
-	clock_t begin_frame;
+	clock_t begin_frame = start_time;
+	clock_t end_frame;
 	float deltaTime;
 	const float frameTime = 1.0f / m_FPS;
-	clock_t last_time = clock();
+
+	// Border string
+	std::wstring border;
+	for (unsigned int i = 0; i < m_RenderTex.GetWidth(); ++i)
+		border += L"-";
 
 	while (m_Running)
 	{
+		// Delta time
+		deltaTime = float(clock() - begin_frame) / CLOCKS_PER_SEC;
+
 		// Reseting the frame
 		begin_frame = clock();
 
-		// Delta time
-		deltaTime = float(clock() - last_time) / CLOCKS_PER_SEC;
-
 		// Clearing the screen
-		system("cls");
 		m_RenderTex.Clear();
 
 		for (unsigned int i = 0; i < m_Objects.size(); ++i)
 		{
 			m_Objects[i]->Update(deltaTime);
-			m_Objects[i]->Render();
+			m_Objects[i]->Render(&m_RenderTex);
 		}
 
 		// Drawing the char map
-		for (unsigned int y = 0; y < m_RenderTex.GetHeight(); ++y)
+		for (unsigned int y = 0; y < m_RenderTex.GetWidth(); ++y)
 		{
-			for (unsigned int x = 0; x < m_RenderTex.GetWidth(); ++x)
+			for (unsigned int x = 0; x < m_RenderTex.GetHeight(); ++x)
 			{
-				if (m_RenderTex[y][x] == 0)
+				if (m_RenderTex[y][x].Data == 0)
 				{
-					std::cout << " ";
+
+					WriteToScreen(x, y, L' ');
 				}
-				else
+				else if (m_RenderTex[y][x].Data == 1)
 				{
-					std::cout << "0";
+					WriteToScreen(x, y, L'0');
 				}
 			}
-
-			std::cout << std::endl;
 		}
 
-		// Calculating timing
-		std::cout << "Time: " << float(clock() - start_time) / CLOCKS_PER_SEC << std::endl;
+		WriteToScreen(0, 0, border);
 
-		std::cout << "DeltaTime: " << deltaTime << std::endl;
-		last_time = float(clock());
+		DWORD dwBytesWritten = 0;
+		WriteConsoleOutputCharacter(m_Console, m_ScreenBuffer, m_RenderTex.GetWidth() * m_RenderTex.GetHeight(), { 0,0 }, &dwBytesWritten);
 
 		// Waiting for the end of the frame to keep the fps
 		while ((float(clock() - begin_frame)) / CLOCKS_PER_SEC < frameTime);
