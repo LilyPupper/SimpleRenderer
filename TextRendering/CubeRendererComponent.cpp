@@ -30,43 +30,37 @@ CubeRendererComponent::CubeRendererComponent(Object* _owner)
 	// Front face		1	2
 	// 1 - 2 - 4
 	// 3 - 4 - 2		4	3
-	m_Triangles.push_back(Tri(m_Vertices[0], m_Vertices[1], m_Vertices[3]));
-	m_Triangles.push_back(Tri(m_Vertices[2], m_Vertices[3], m_Vertices[1]));
+	m_Triangles.push_back(Tri(m_Vertices[0], m_Vertices[1], m_Vertices[3], 0));
+	m_Triangles.push_back(Tri(m_Vertices[2], m_Vertices[3], m_Vertices[1], 0));
 	// Right face		2	6
 	// 2 - 6 - 3
 	// 7 - 3 - 6		3	7
-	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[5], m_Vertices[2]));
-	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[2], m_Vertices[5]));
+	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[5], m_Vertices[2], 1));
+	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[2], m_Vertices[5], 1));
 	// Back face		6	5
 	// 6 - 5 - 7
 	// 8 - 7 - 5		7	8
-	m_Triangles.push_back(Tri(m_Vertices[5], m_Vertices[4], m_Vertices[6]));
-	m_Triangles.push_back(Tri(m_Vertices[7], m_Vertices[6], m_Vertices[4]));
+	m_Triangles.push_back(Tri(m_Vertices[5], m_Vertices[4], m_Vertices[6], 2));
+	m_Triangles.push_back(Tri(m_Vertices[7], m_Vertices[6], m_Vertices[4], 2));
 	// Left face		5	1
 	// 5 - 1 - 8
 	// 4 - 8 - 1		8	4
-	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[0], m_Vertices[7]));
-	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[7], m_Vertices[0]));
+	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[0], m_Vertices[7], 0));
+	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[7], m_Vertices[0], 0));
 	// Top face			5	6
 	// 5 - 6 - 1
 	// 2 - 1 - 6		1	2
-	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[5], m_Vertices[0]));
-	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[0], m_Vertices[5]));
+	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[5], m_Vertices[0], 1));
+	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[0], m_Vertices[5], 1));
 	// Bottom face		4	3
 	// 4 - 3 - 8
 	// 7 - 8 - 3		8	7
-	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[2], m_Vertices[7]));
-	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[7], m_Vertices[2]));
+	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[2], m_Vertices[7], 2));
+	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[7], m_Vertices[2], 2));
 }
 
 CubeRendererComponent::~CubeRendererComponent()
-{
-	//for (unsigned int i = 0; i < m_Vertices.size(); ++i)
-	//	delete m_Vertices[i];
-	//
-	//for (unsigned int i = 0; i < m_Triangles.size(); ++i)
-	//	delete m_Triangles[i];
-}
+{}
 
 void CubeRendererComponent::Update(const float& _deltaTime)
 {
@@ -76,7 +70,7 @@ void CubeRendererComponent::Update(const float& _deltaTime)
 
 	// Updating the scale
 	m_Time += _deltaTime;
-	m_Scale = 5.0f + (sinf(m_Time * 0.25f) * 2.0f);
+	m_Scale = 10.0f;// +(sinf(m_Time * 0.25f) * 2.0f);
 
 	// Updating the angle
 	m_RotAngles.x += angleXIncrease * _deltaTime;
@@ -93,76 +87,122 @@ void CubeRendererComponent::Update(const float& _deltaTime)
 
 void CubeRendererComponent::Render(CharTexture* _texture)
 {	
+	//Render_Single(_texture);
+	Render_Async(_texture);
+}
+
+void CubeRendererComponent::Render_Single(CharTexture* _texture)
+{
 	// For every pixel in the texture
 	for (unsigned int y = 0; y < _texture->GetHeight(); ++y)
 	{
 		for (unsigned int x = 0; x < _texture->GetWidth(); ++x)
 		{
-			Vec3 origin(x, y, -15.0f);
+			Vec3 origin(x, y, -10.0f);
 			Vec3 dir(0.0f, 0.0f, 1.0f);
-	
+
 			// Raycast every triangle
 			for (unsigned int i = 0; i < m_Triangles.size(); ++i)
-			{
-				//if (m_Triangles[i].Cull(dir))
-				//	break;
-
+			{	
 				Tri t = m_Triangles[i];
-				
+	
 				// Scale
 				t = t * m_Scale;
 	
 				// Rotate
-				t.RotatePoints(Vec3::Forward(),		m_RotAngles.x);
-				t.RotatePoints(Vec3::Up(),			m_RotAngles.y);
-				t.RotatePoints(Vec3::Right(),		m_RotAngles.z);
-				
+				t.RotatePoints(Vec3::Forward(), m_RotAngles.x);
+				t.RotatePoints(Vec3::Up(), m_RotAngles.y);
+				t.RotatePoints(Vec3::Right(), m_RotAngles.z);
+	
 				// Translate
 				TransformComponent* transform = GetTransform();
 				if (transform)
 				{
 					t = t + transform->m_Position;
 				}
-				
-				bool hit = Physics::Raycast(t, origin, dir);
-				if (hit)
+
+				float baryX, baryY, distance;
+				if (Physics::IntersectRayTriangle(origin, dir, t, baryX, baryY, distance))
 				{
-					(*_texture)[x][y].Data = 1;
+					if (distance < (*_texture)[x][y].Depth)
+					{
+						(*_texture)[x][y].Data = 1;
+						(*_texture)[x][y].Depth = distance;
+						(*_texture)[x][y].Color = 1 << t.Color;
+					}
 				}
 			}
 	
 		}
 	}
+}
 
-	//for (int i = 0; i < m_Vertices.size(); ++i)
-	//{
-	//	Vec3 result = m_Vertices[i];
-	//
-	//	// Scaling
-	//	result = result * m_Scale;
-	//
-	//	// Rotating
-	//	result.Rotate(Vec3::Forward(), m_RotAngles.x);
-	//	result.Rotate(Vec3::Up(), m_RotAngles.y);
-	//	result.Rotate(Vec3::Right(), m_RotAngles.z);
-	//
-	//	// Translate
-	//	TransformComponent* transform = GetTransform();
-	//	if (transform)
-	//	{
-	//		result = result + transform->m_Position;
-	//	}
-	//
-	//	// Projecting
-	//	//result = m_Projection * result;
-	//
-	//	int x = (int)roundf(result.x);
-	//	int y = (int)roundf(result.y);
-	//
-	//	// Doesn't render if the cube vertices exceed the limits of the character map
-	//	if (x < _texture->GetWidth() && x > 0 && y < _texture->GetHeight() && y > 0)
-	//	{
-	//		(*_texture)[x][y].Data = 2;
-	//	}
-	//}
+void CubeRendererComponent::Render_Async(CharTexture* _texture)
+{
+	for (unsigned int y = 0; y < _texture->GetHeight(); ++y)
+	{
+		m_Futures.push_back(std::async(std::launch::async, &CubeRendererComponent::RenderThread, this, _texture, y, y + 1));
+	}
+
+	bool finished = false;
+	while (!finished)
+	{
+		int count = 0;
+		for (unsigned int i = 0; i < m_Futures.size(); ++i)
+		{
+			if (m_Futures[i]._Is_ready())
+				++count;
+		}
+
+		if (count == m_Futures.size())
+		{
+			finished = true;
+			m_Futures.clear();
+		}
+	}
+}
+
+void CubeRendererComponent::RenderThread(CharTexture* _texture, unsigned int _rowStart, unsigned int _rowEnd)
+{
+	// For every pixel in the texture
+	for (unsigned int y = 0; y < _texture->GetHeight(); ++y)
+	{
+		for (unsigned int x = 0; x < _texture->GetWidth(); ++x)
+		{
+			Vec3 origin(x, y, -10.0f);
+			Vec3 dir(0.0f, 0.0f, 1.0f);
+
+			// Raycast every triangle
+			for (unsigned int i = 0; i < m_Triangles.size(); ++i)
+			{
+				Tri t = m_Triangles[i];
+
+				// Scale
+				t = t * m_Scale;
+
+				// Rotate
+				t.RotatePoints(Vec3::Forward(), m_RotAngles.x);
+				t.RotatePoints(Vec3::Up(), m_RotAngles.y);
+				t.RotatePoints(Vec3::Right(), m_RotAngles.z);
+
+				// Translate
+				TransformComponent* transform = GetTransform();
+				if (transform)
+				{
+					t = t + transform->m_Position;
+				}
+
+				float baryX, baryY, distance;
+				if (Physics::IntersectRayTriangle(origin, dir, t, baryX, baryY, distance))
+				{
+					if (distance < (*_texture)[x][y].Depth)
+					{
+						(*_texture)[x][y].Data = 1;
+						(*_texture)[x][y].Depth = distance;
+						(*_texture)[x][y].Color = 1 << t.Color;
+					}
+				}
+			}
+		}
+	}
 }

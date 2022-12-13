@@ -1,7 +1,9 @@
 #include "Tri.h"
 
-Tri::Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3)
-	: v1(_v1), v2(_v2), v3(_v3)
+#include <math.h>
+
+Tri::Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3, const short& _color)
+	: v1(_v1), v2(_v2), v3(_v3), Color(_color)
 {}
 
 Tri::~Tri()
@@ -16,15 +18,7 @@ void Tri::RotatePoints(Vec3 _axis, float _theta)
 
 Vec3 Tri::GetSurfaceNormal() const
 {
-
-	return Vec3::Cross(v1, v2).Normalized();
-}
-
-bool Tri::Cull(const Vec3& _facing)
-{
-	if (Vec3::Dot(GetSurfaceNormal(), _facing) > 0.0f)
-		return false;
-	return true;
+	return Vec3::Cross(v1 - v2, v2 - v3).Normalized();
 }
 
 void Tri::operator=(const Tri& _other)

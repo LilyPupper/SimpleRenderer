@@ -22,7 +22,8 @@ private:
 	CharTexture m_RenderTex;
 	std::vector<Object*> m_Objects;
 	bool m_Running = true;
-	float m_FPS = 1000.f;
+	bool m_VSync = true;
+	float m_FPS = 165.f;
 
 	wchar_t* m_ScreenBuffer;
 	HANDLE m_Console;

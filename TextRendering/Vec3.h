@@ -24,6 +24,7 @@ public:
 	static inline Vec3 Forward()	{ return Vec3(1.0f, 0.0f, 0.0f); }
 	static inline Vec3 Up()			{ return Vec3(0.0f, 1.0f, 0.0f); }
 	static inline Vec3 Right()		{ return Vec3(0.0f, 0.0f, 1.0f); }
+	static inline Vec3 Zero()		{ return Vec3(0.0f, 0.0f, 0.0f); }
 
 	float Magnitude() const;
 
@@ -33,6 +34,8 @@ public:
 	static float Dot(const Vec3& _lhs, const Vec3& _rhs);
 	static Vec3 Cross(const Vec3& _lhs, const Vec3& _rhs);
 
+	static float Distance(const Vec3& _lhs, const Vec3& _rhs);
+
 	Vec3 operator+(const Vec3& _v) const;
 	Vec3 operator-(const Vec3& _v) const;
 	Vec3 operator*(const float& _scalar) const;
@@ -40,3 +43,5 @@ public:
 	
 	float x, y, z;
 };
+
+Vec3 operator*(const float& _scalar, const Vec3& _v);

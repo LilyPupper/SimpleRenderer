@@ -3,6 +3,13 @@
 #include <cassert>
 #include <iostream>
 
+PixelData::PixelData()
+	: Data(0), Depth(1000000.0f), Color(0)
+{}
+
+PixelData::~PixelData()
+{}
+
 CharTexture_Accessor::CharTexture_Accessor(const CharTexture* _owner)
 	: m_Owner(_owner)
 {}
@@ -31,7 +38,11 @@ CharTexture::~CharTexture()
 void CharTexture::Clear()
 {
 	for (unsigned int i = 0; i < m_Length; ++i)
+	{
 		m_Texture[i].Data = 0;
+		m_Texture[i].Depth = 1000000.0f;
+		m_Texture[i].Color = 0;
+	}
 }
 
 void CharTexture::Debug()

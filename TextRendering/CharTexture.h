@@ -1,8 +1,14 @@
 #pragma once
 
-struct PixelData
+class PixelData
 {
+public:
+	PixelData();
+	~PixelData();
+
 	int Data;
+	float Depth;
+	short Color;
 };
 
 //////////////////////////////////////////////////

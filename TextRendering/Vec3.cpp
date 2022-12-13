@@ -32,19 +32,24 @@ float Vec3::Magnitude() const
 void Vec3::Normalize()
 {
 	float mag = Magnitude();
-	x = x / mag;
-	y = y / mag;
-	z = z / mag;
+	if (mag != 0.0f)
+	{
+		x = x / mag;
+		y = y / mag;
+		z = z / mag;
+	}
 }
 
 Vec3 Vec3::Normalized() const
 {
 	Vec3 result = *this;
 	float mag = Magnitude();
+	assert(mag == 0.0f);
 	result.x = result.x / mag;
 	result.y = result.y / mag;
 	result.z = result.z / mag;
 	return result;
+
 }
 
 float Vec3::Dot(const Vec3& _lhs, const Vec3& _rhs)
@@ -59,6 +64,13 @@ Vec3 Vec3::Cross(const Vec3& _lhs, const Vec3& _rhs)
 		(_lhs.z * _rhs.x) - (_lhs.x * _rhs.z),
 		(_lhs.x * _rhs.y) - (_lhs.y * _rhs.x)
 	);
+}
+
+float Vec3::Distance(const Vec3& _lhs, const Vec3& _rhs)
+{
+	return sqrt((_lhs.x - _rhs.x) * (_lhs.x - _rhs.x) +
+				(_lhs.y - _rhs.y) * (_lhs.y - _rhs.y) +
+				(_lhs.z - _rhs.z) * (_lhs.z - _rhs.z));
 }
 
 void Vec3::Rotate(const Vec3& _axis, const float& _theta)
@@ -161,4 +173,9 @@ float& Vec3::operator[](const unsigned int& _index)
 	assert(_index < 3 && "_index out of range!");
 
 	return *(reinterpret_cast<float*>(this) + _index);
+}
+
+Vec3 operator*(const float& _scalar, const Vec3& _v)
+{
+	return Vec3(_v.x * _scalar, _v.y * _scalar, _v.z * _scalar);
 }
