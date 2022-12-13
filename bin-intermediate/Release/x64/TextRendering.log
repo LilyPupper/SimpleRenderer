@@ -1,10 +1,6 @@
-﻿  CubeRendererComponent.cpp
-C:\Projects\TextRendering\TextRendering\CubeRendererComponent.cpp(101,19): warning C4244: 'argument': conversion from 'unsigned int' to 'const float', possible loss of data
-C:\Projects\TextRendering\TextRendering\CubeRendererComponent.cpp(101,16): warning C4244: 'argument': conversion from 'unsigned int' to 'const float', possible loss of data
-C:\Projects\TextRendering\TextRendering\CubeRendererComponent.cpp(172,19): warning C4244: 'argument': conversion from 'unsigned int' to 'const float', possible loss of data
-C:\Projects\TextRendering\TextRendering\CubeRendererComponent.cpp(172,16): warning C4244: 'argument': conversion from 'unsigned int' to 'const float', possible loss of data
+﻿  RotatingCube.cpp
   Generating code
-  1 of 1219 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  4 of 1699 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code

@@ -31,6 +31,12 @@
     <Filter Include="Header Files\Components">
       <UniqueIdentifier>{883437cc-34fa-4567-8740-e74c04ce3b59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Components\Mesh">
+      <UniqueIdentifier>{644a48c9-bb2c-48c6-86d3-15a70b536fc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Components\Mesh">
+      <UniqueIdentifier>{b56356cd-92be-44d1-add3-e170d6f53e1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -57,14 +63,20 @@
     <ClInclude Include="TransformComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="CubeRendererComponent.h">
-      <Filter>Header Files\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Physics.h">
       <Filter>Header Files\Math</Filter>
     </ClInclude>
     <ClInclude Include="Tri.h">
       <Filter>Header Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshComponent.h">
+      <Filter>Header Files\Components\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRendererComponent.h">
+      <Filter>Header Files\Components\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Components\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,10 +107,19 @@
     <ClCompile Include="TransformComponent.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="CubeRendererComponent.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
     <ClCompile Include="Tri.cpp">
+      <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Components\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshComponent.cpp">
+      <Filter>Source Files\Components\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRendererComponent.cpp">
+      <Filter>Source Files\Components\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
   </ItemGroup>

@@ -23,7 +23,7 @@ private:
 	std::vector<Object*> m_Objects;
 	bool m_Running = true;
 	bool m_VSync = true;
-	float m_FPS = 165.f;
+	float m_FPS = 60.f;
 
 	wchar_t* m_ScreenBuffer;
 	HANDLE m_Console;

@@ -1,11 +1,25 @@
 #include "RotatingCube.h"
 
-#include "CubeRendererComponent.h"
+#include "TransformComponent.h"
+#include "Mesh.h"
+#include "MeshComponent.h"
+#include "MeshRendererComponent.h"
+
+#include <string>
 
 RotatingCube::RotatingCube()
 {
-	// Add components here
-	AddComponent(new CubeRendererComponent(this));
+	TransformComponent* transform = GetTransform();
+	if (transform)
+	{
+		transform->m_Position = Vec3(60.0f, 15.0f, 0.0f);
+	}
+
+	AddComponent(new MeshRendererComponent(this));
+
+	Mesh* mesh = new Mesh();
+	bool loaded = mesh->Load("C:/Projects/TextRendering/models/Torus_High.obj");
+	AddComponent(new MeshComponent(this, mesh));
 }
 
 RotatingCube::~RotatingCube()

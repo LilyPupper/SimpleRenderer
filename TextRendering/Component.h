@@ -7,6 +7,8 @@ class TransformComponent;
 enum COMPONENT_TYPE
 {
 	TRANSFORM,
+	MESH,
+	MESHRENDERER,
 };
 
 class Component
@@ -22,7 +24,12 @@ public:
 	Object* GetOwner();
 	inline TransformComponent* GetTransform() { return m_Owner->GetTransform(); }
 
+	inline const bool& IsActive() { return m_Active; }
+	inline void SetActive(const bool& _active) { m_Active = _active; }
+
 protected:
 	COMPONENT_TYPE m_Type;
 	Object* m_Owner;
+
+	bool m_Active = true;
 };

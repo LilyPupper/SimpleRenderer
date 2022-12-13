@@ -99,25 +99,21 @@ void Application::Run()
 				c.Y = x;
 				if (m_RenderTex[y][x].Data == 0)
 				{
-					WORD attr = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN;
-					WriteConsoleOutputAttribute(m_Console, &attr, 1, c, &dwBytesWritten);
-					WriteConsoleOutputCharacter(m_Console, L" ", 1, c, &dwBytesWritten);
-					//WriteToScreen(x, y, L' ');
+					WriteToScreen(x, y, L' ');
 				}
 				else if (m_RenderTex[y][x].Data == 1)
 				{
 					WORD attr = m_RenderTex[y][x].Color;
 					WriteConsoleOutputAttribute(m_Console, &attr, 1, c, &dwBytesWritten);
-					WriteConsoleOutputCharacter(m_Console, L"0", 1, c, &dwBytesWritten);
-					//WriteToScreen(x, y, L'0');
+					WriteToScreen(x, y, L'#');
 				}
 			}
 		}
 
-		//WriteToScreen(0, 0, border);
-		//WriteToScreen(m_RenderTex.GetHeight() - 1, 0, L"FPS: " + std::to_wstring(1.0f / deltaTime));
-		//
-		//WriteConsoleOutputCharacter(m_Console, m_ScreenBuffer, m_RenderTex.GetWidth() * m_RenderTex.GetHeight(), { 0,0 }, &dwBytesWritten);
+		WriteToScreen(0, 0, border);
+		WriteToScreen(m_RenderTex.GetHeight() - 1, 0, L"FPS: " + std::to_wstring(1.0f / deltaTime));
+		
+		WriteConsoleOutputCharacter(m_Console, m_ScreenBuffer, m_RenderTex.GetWidth() * m_RenderTex.GetHeight(), { 0,0 }, &dwBytesWritten);
 
 		// Waiting for the end of the frame to keep the fps
 		if (m_VSync)
