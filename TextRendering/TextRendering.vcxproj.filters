@@ -57,7 +57,7 @@
     <ClInclude Include="Component.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="RotatingCube.h">
+    <ClInclude Include="RotatingModel.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="TransformComponent.h">
@@ -101,7 +101,7 @@
     <ClCompile Include="Component.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
-    <ClCompile Include="RotatingCube.cpp">
+    <ClCompile Include="RotatingModel.cpp">
       <Filter>Source Files\Objects</Filter>
     </ClCompile>
     <ClCompile Include="TransformComponent.cpp">

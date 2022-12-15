@@ -53,8 +53,8 @@ bool Mesh::Load(const char* _filePath)
 				iss >> nextWord;
 				int i4 = std::stoi(nextWord) - 1;
 
-				m_Triangles.push_back(Tri(m_Vertices[i1], m_Vertices[i2], m_Vertices[i3], 0));
-				m_Triangles.push_back(Tri(m_Vertices[i3], m_Vertices[i4], m_Vertices[i1], 0));
+				m_Triangles.push_back(Tri(m_Vertices[i1], m_Vertices[i2], m_Vertices[i3]));
+				m_Triangles.push_back(Tri(m_Vertices[i3], m_Vertices[i4], m_Vertices[i1]));
 			}
 		}
 		file.close();
@@ -80,31 +80,31 @@ void Mesh::LoadCube()
 	// Front face		1	2
 	// 1 - 2 - 4
 	// 3 - 4 - 2		4	3
-	m_Triangles.push_back(Tri(m_Vertices[0], m_Vertices[1], m_Vertices[3], 0));
-	m_Triangles.push_back(Tri(m_Vertices[2], m_Vertices[3], m_Vertices[1], 0));
+	m_Triangles.push_back(Tri(m_Vertices[0], m_Vertices[1], m_Vertices[3]));
+	m_Triangles.push_back(Tri(m_Vertices[2], m_Vertices[3], m_Vertices[1]));
 	// Right face		2	6
 	// 2 - 6 - 3
 	// 7 - 3 - 6		3	7
-	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[5], m_Vertices[2], 1));
-	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[2], m_Vertices[5], 1));
+	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[5], m_Vertices[2]));
+	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[2], m_Vertices[5]));
 	// Back face		6	5
 	// 6 - 5 - 7
 	// 8 - 7 - 5		7	8
-	m_Triangles.push_back(Tri(m_Vertices[5], m_Vertices[4], m_Vertices[6], 2));
-	m_Triangles.push_back(Tri(m_Vertices[7], m_Vertices[6], m_Vertices[4], 2));
+	m_Triangles.push_back(Tri(m_Vertices[5], m_Vertices[4], m_Vertices[6]));
+	m_Triangles.push_back(Tri(m_Vertices[7], m_Vertices[6], m_Vertices[4]));
 	// Left face		5	1
 	// 5 - 1 - 8
 	// 4 - 8 - 1		8	4
-	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[0], m_Vertices[7], 0));
-	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[7], m_Vertices[0], 0));
+	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[0], m_Vertices[7]));
+	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[7], m_Vertices[0]));
 	// Top face			5	6
 	// 5 - 6 - 1
 	// 2 - 1 - 6		1	2
-	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[5], m_Vertices[0], 1));
-	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[0], m_Vertices[5], 1));
+	m_Triangles.push_back(Tri(m_Vertices[4], m_Vertices[5], m_Vertices[0]));
+	m_Triangles.push_back(Tri(m_Vertices[1], m_Vertices[0], m_Vertices[5]));
 	// Bottom face		4	3
 	// 4 - 3 - 8
 	// 7 - 8 - 3		8	7
-	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[2], m_Vertices[7], 2));
-	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[7], m_Vertices[2], 2));
+	m_Triangles.push_back(Tri(m_Vertices[3], m_Vertices[2], m_Vertices[7]));
+	m_Triangles.push_back(Tri(m_Vertices[6], m_Vertices[7], m_Vertices[2]));
 }

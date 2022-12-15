@@ -156,7 +156,7 @@
     <ClInclude Include="MeshRendererComponent.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Physics.h" />
-    <ClInclude Include="RotatingCube.h" />
+    <ClInclude Include="RotatingModel.h" />
     <ClInclude Include="TransformComponent.h" />
     <ClInclude Include="Tri.h" />
     <ClInclude Include="Vec3.h" />
@@ -172,7 +172,7 @@
     <ClCompile Include="MeshRendererComponent.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Physics.cpp" />
-    <ClCompile Include="RotatingCube.cpp" />
+    <ClCompile Include="RotatingModel.cpp" />
     <ClCompile Include="TransformComponent.cpp" />
     <ClCompile Include="Tri.cpp" />
     <ClCompile Include="Vec3.cpp" />

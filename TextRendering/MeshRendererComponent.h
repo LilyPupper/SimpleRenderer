@@ -15,6 +15,13 @@ enum RENDER_MODE
 	MULTI
 };
 
+enum MESH_COLOUR
+{
+	BLUE = 0,
+	GREEN = 1,
+	RED = 2
+};
+
 class MeshRendererComponent : public Component
 {
 public:

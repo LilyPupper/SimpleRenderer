@@ -25,7 +25,7 @@ void MeshRendererComponent::Update(const float& _deltaTime)
 
 	// Updating the scale
 	m_Time += _deltaTime;
-	m_Scale = 5.0f + (sinf(m_Time * 2.0f) * 2.0f);
+	m_Scale = m_Scale + (sinf(m_Time * 2.0f) * 2.0f);
 
 	// Updating the angle
 	m_RotAngles.x += angleXIncrease * _deltaTime;
@@ -36,7 +36,7 @@ void MeshRendererComponent::Update(const float& _deltaTime)
 	TransformComponent* transform = GetTransform();
 	if (transform)
 	{
-		transform->m_Position = Vec3(60.0f + (sinf(m_Time) * 20.0f), 15.0f, 0.0f);
+		transform->m_Position = Vec3(transform->m_Position.x + sinf(m_Time), transform->m_Position.y, transform->m_Position.z);
 	}
 }
 
@@ -89,7 +89,7 @@ void MeshRendererComponent::Render_Single(CharTexture* _texture, const Mesh* _me
 					{
 						(*_texture)[x][y].Data = 1;
 						(*_texture)[x][y].Depth = distance;
-						(*_texture)[x][y].Color = 1 << t.Color;
+						(*_texture)[x][y].Color = MESH_COLOUR::RED;
 					}
 				}
 			}
@@ -163,7 +163,7 @@ void MeshRendererComponent::RenderRow(CharTexture* _texture, const Mesh* _mesh, 
 				{
 					(*_texture)[_row][y].Data = 1;
 					(*_texture)[_row][y].Depth = distance;
-					(*_texture)[_row][y].Color = 1 << t.Color;
+					(*_texture)[_row][y].Color = MESH_COLOUR::RED;
 				}
 			}
 		}

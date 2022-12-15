@@ -5,7 +5,7 @@
 class Tri
 {
 public:
-	Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3, const short& _color = 0);
+	Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3);
 	~Tri();
 
 	void RotatePoints(Vec3 _axis, float _theta);
@@ -19,6 +19,4 @@ public:
 	Vec3 v1;
 	Vec3 v2;
 	Vec3 v3;
-
-	short Color;
 };

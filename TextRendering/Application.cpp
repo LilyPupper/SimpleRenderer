@@ -1,7 +1,9 @@
 #include "Application.h"
 
 #include "Component.h"
-#include "RotatingCube.h"
+#include "TransformComponent.h"
+#include "RotatingModel.h"
+#include "Mesh.h"
 
 #include <iostream>
 #include <time.h>
@@ -33,7 +35,11 @@ Application::Application(const int& _width, const int& _height)
 	}
 
 	// Add objects here
-	m_Objects.push_back(new RotatingCube());
+	RotatingModel* rt1 = new RotatingModel("Fox.obj");
+	TransformComponent* transform1 = static_cast<TransformComponent*>(rt1->FindComponentOfType(TRANSFORM));
+	if (transform1)
+		transform1->m_Position = Vec3(60.0f, 15.0f, 0.0f);
+	m_Objects.push_back(rt1);
 }
 
 Application::~Application()

@@ -1,5 +1,7 @@
 #include "MeshComponent.h"
 
+#include "Mesh.h"
+
 MeshComponent::MeshComponent(Object* _owner, Mesh* _mesh)
 	: Component(_owner), m_Mesh(_mesh)
 {

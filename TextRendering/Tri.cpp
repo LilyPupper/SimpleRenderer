@@ -2,8 +2,8 @@
 
 #include <math.h>
 
-Tri::Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3, const short& _color)
-	: v1(_v1), v2(_v2), v3(_v3), Color(_color)
+Tri::Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3)
+	: v1(_v1), v2(_v2), v3(_v3)
 {}
 
 Tri::~Tri()
