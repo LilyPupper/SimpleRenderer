@@ -5,33 +5,17 @@
 #include "Components/MeshComponent.h"
 #include "Components/MeshRendererComponent.h"
 
-#include <string>
-#include <Windows.h>
-
 RotatingModel::RotatingModel(const char* _filepath)
 	: m_Time(0.0f)
 {
 	AddComponent(new MeshRendererComponent(this));
 
-	// Get current exe path
-	char cCurrentPath[FILENAME_MAX];
-	GetModuleFileNameA(NULL, cCurrentPath, sizeof(cCurrentPath));
-	std::string directory = cCurrentPath;
-	directory = directory.substr(0, directory.find_last_of("\\"));
-
 	// Load mesh
 	Mesh* mesh = new Mesh();
-	bool loaded = mesh->Load((directory + "\\" + _filepath).c_str());
+	bool loaded = mesh->Load(_filepath);
 
 	// Attach mesh as component
 	AddComponent(new MeshComponent(this, mesh));
-
-	TransformComponent* t = static_cast<TransformComponent*>(FindComponentOfType(TRANSFORM));
-	if (t != nullptr)
-	{
-		t->SetScale(10.0f);
-		t->SetPosition(60.0f, 15.0f, 0.0f);
-	}
 }
 
 RotatingModel::~RotatingModel()
@@ -56,8 +40,9 @@ void RotatingModel::Update(const float& _deltaTime)
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
 		t->SetRotation(r * m_Time * 1.0f);
 
-		float x = sinf(m_Time) * 10.0f;
-		t->SetPosition(60.0f + x, 15.0f, 0.0f);
+		float x = sinf(m_Time) * 0.1f;
+		glm::vec3 pos = t->GetPosition();
+		t->SetPosition(pos.x + x, pos.y, pos.z);
 	}
 }
 

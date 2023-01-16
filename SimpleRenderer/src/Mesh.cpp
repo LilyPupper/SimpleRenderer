@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <Windows.h>
 
 Mesh::Mesh()
 {}
@@ -13,10 +15,16 @@ Mesh::~Mesh()
 
 bool Mesh::Load(const char* _filePath)
 {
+	// Get current exe path
+	char cCurrentPath[FILENAME_MAX];
+	GetModuleFileNameA(NULL, cCurrentPath, sizeof(cCurrentPath));
+	std::string directory = cCurrentPath;
+	directory = directory.substr(0, directory.find_last_of("\\")) + "\\" + _filePath;
+
 	std::string line;
 	std::ifstream file;
 
-	file.open(_filePath);
+	file.open(directory);
 	if (file.is_open())
 	{
 		while (std::getline(file, line))

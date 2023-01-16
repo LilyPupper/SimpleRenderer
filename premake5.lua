@@ -1,10 +1,10 @@
-workspace "TextRendering"
+workspace "SimpleRenderer"
 	architecture "x64"
-	startproject "TextRendering"
+	startproject "SimpleRenderer"
 	configurations { "Debug", "Release" }
 
-project "TextRendering"
-	location "TextRendering"
+project "SimpleRenderer"
+	location "SimpleRenderer"
 	kind "ConsoleApp"
 	language "C++"
 	staticruntime "on"

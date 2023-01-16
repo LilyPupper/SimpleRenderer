@@ -34,8 +34,15 @@ Application::Application(const int& _width, const int& _height)
 	}
 
 	// Add objects here
-	RotatingModel* rt1 = new RotatingModel("models\\Torus_Low.obj");
-	m_Objects.push_back(rt1);
+	RotatingModel* rm1 = new RotatingModel("models\\Torus_Low.obj");
+	TransformComponent* t1 = static_cast<TransformComponent*>(rm1->FindComponentOfType(TRANSFORM));
+	if (t1 != nullptr)
+	{
+		t1->SetScale(10.0f);
+		t1->SetPosition(60.0f, 15.0f, 0.0f);
+	}
+
+	m_Objects.push_back(rm1);
 }
 
 Application::~Application()
