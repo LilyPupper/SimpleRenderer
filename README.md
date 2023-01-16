@@ -7,7 +7,7 @@
 </div>
 
 ## Getting Started
-Just clone the repo, run 'Generate_VS2022_Project.bat', build, and run
+Just clone the repo, run 'Generate_VS20XX_Project.bat', build, and run
 
 ### Prerequisites
 * Windows
