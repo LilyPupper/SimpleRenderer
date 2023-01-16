@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-<h3 align="center">TextRendering</h3>
+<h3 align="center">SimpleRenderer</h3>
   <p align="center">
     A simple renderer to that outputs .obj models to the console
   </p>
