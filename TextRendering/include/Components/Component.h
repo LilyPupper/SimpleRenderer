@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object.h"
+#include "Objects/Object.h"
 
 class CharTexture;
 class TransformComponent;

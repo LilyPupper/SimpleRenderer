@@ -1,6 +1,6 @@
-#include "MeshRendererComponent.h"
-#include "TransformComponent.h"
-#include "MeshComponent.h"
+#include "Components/MeshRendererComponent.h"
+#include "Components/TransformComponent.h"
+#include "Components/MeshComponent.h"
 #include "Tri.h"
 
 #include "CharTexture.h"

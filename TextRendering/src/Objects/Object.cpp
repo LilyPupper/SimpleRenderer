@@ -1,7 +1,7 @@
-#include "Object.h"
+#include "Objects/Object.h"
 
-#include "Component.h"
-#include "TransformComponent.h"
+#include "Components/Component.h"
+#include "Components/TransformComponent.h"
 #include "CharTexture.h"
 
 unsigned int Object::s_ObjectIDCount = 0;

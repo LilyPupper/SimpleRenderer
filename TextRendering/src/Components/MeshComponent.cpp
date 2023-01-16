@@ -1,4 +1,4 @@
-#include "MeshComponent.h"
+#include "Components/MeshComponent.h"
 
 #include "Mesh.h"
 

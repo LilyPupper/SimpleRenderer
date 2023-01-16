@@ -1,9 +1,9 @@
-#include "RotatingModel.h"
+#include "Objects/RotatingModel.h"
 
-#include "TransformComponent.h"
 #include "Mesh.h"
-#include "MeshComponent.h"
-#include "MeshRendererComponent.h"
+#include "Components/TransformComponent.h"
+#include "Components/MeshComponent.h"
+#include "Components/MeshRendererComponent.h"
 
 #include <string>
 #include <Windows.h>
@@ -21,7 +21,7 @@ RotatingModel::RotatingModel(const char* _filepath)
 
 	// Load mesh
 	Mesh* mesh = new Mesh();
-	bool loaded = mesh->Load((directory + "\\..\\..\\..\\models\\" + _filepath).c_str());
+	bool loaded = mesh->Load((directory + "\\" + _filepath).c_str());
 
 	// Attach mesh as component
 	AddComponent(new MeshComponent(this, mesh));

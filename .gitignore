@@ -3,8 +3,8 @@
 Debug/
 TextRendering/Debug/
 bin/
-bin-intermediate/
 
 # Files
 *.user
 *.url
+*.sln

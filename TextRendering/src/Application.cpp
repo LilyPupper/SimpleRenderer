@@ -1,7 +1,7 @@
 #include "Application.h"
 
-#include "RotatingModel.h"
-#include "TransformComponent.h"
+#include "Objects/RotatingModel.h"
+#include "Components/TransformComponent.h"
 #include "Mesh.h"
 
 #include <iostream>
@@ -34,7 +34,7 @@ Application::Application(const int& _width, const int& _height)
 	}
 
 	// Add objects here
-	RotatingModel* rt1 = new RotatingModel("Torus_Low.obj");
+	RotatingModel* rt1 = new RotatingModel("models\\Torus_Low.obj");
 	m_Objects.push_back(rt1);
 }
 
