@@ -108,6 +108,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\glm\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +140,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\glm\glm;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,7 +152,6 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="CharTexture.h" />
     <ClInclude Include="Component.h" />
-    <ClInclude Include="Mat3.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshComponent.h" />
     <ClInclude Include="MeshRendererComponent.h" />
@@ -159,14 +160,13 @@
     <ClInclude Include="RotatingModel.h" />
     <ClInclude Include="TransformComponent.h" />
     <ClInclude Include="Tri.h" />
-    <ClInclude Include="Vec3.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="CharTexture.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Mat3.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshComponent.cpp" />
     <ClCompile Include="MeshRendererComponent.cpp" />
@@ -175,7 +175,6 @@
     <ClCompile Include="RotatingModel.cpp" />
     <ClCompile Include="TransformComponent.cpp" />
     <ClCompile Include="Tri.cpp" />
-    <ClCompile Include="Vec3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,7 +8,6 @@ public:
 
 	int Data;
 	float Depth;
-	short Color;
 };
 
 //////////////////////////////////////////////////

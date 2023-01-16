@@ -1,5 +1,7 @@
 #include "Mesh.h"
 
+#include "Tri.h"
+
 #include <fstream>
 #include <sstream>
 
@@ -38,7 +40,7 @@ bool Mesh::Load(const char* _filePath)
 				float y = std::stof(nextWord);
 				iss >> nextWord;
 				float z = std::stof(nextWord);
-				m_Vertices.push_back(Vec3(x, y, z));
+				m_Vertices.push_back(Vertex(x, y, z));
 			}
 			else if (firstWord == "f")
 			{
@@ -66,16 +68,16 @@ bool Mesh::Load(const char* _filePath)
 void Mesh::LoadCube()
 {
 	// Create vertices
-	m_Vertices.push_back(Vec3(-1.f, -1.f, 1.f));	// 1
-	m_Vertices.push_back(Vec3(1.f, -1.f, 1.f));	// 2
-	m_Vertices.push_back(Vec3(1.f, 1.f, 1.f));	// 3
-	m_Vertices.push_back(Vec3(-1.f, 1.f, 1.f));	// 4
-
-	m_Vertices.push_back(Vec3(-1.f, -1.f, -1.f));	// 5
-	m_Vertices.push_back(Vec3(1.f, -1.f, -1.f));	// 6
-	m_Vertices.push_back(Vec3(1.f, 1.f, -1.f));	// 7
-	m_Vertices.push_back(Vec3(-1.f, 1.f, -1.f));	// 8
-
+	m_Vertices.push_back(Vertex(-1.f, -1.f, 1.f));	// 1
+	m_Vertices.push_back(Vertex(1.f, -1.f, 1.f));	// 2
+	m_Vertices.push_back(Vertex(1.f, 1.f, 1.f));	// 3
+	m_Vertices.push_back(Vertex(-1.f, 1.f, 1.f));	// 4
+						 
+	m_Vertices.push_back(Vertex(-1.f, -1.f, -1.f));	// 5
+	m_Vertices.push_back(Vertex(1.f, -1.f, -1.f));	// 6
+	m_Vertices.push_back(Vertex(1.f, 1.f, -1.f));	// 7
+	m_Vertices.push_back(Vertex(-1.f, 1.f, -1.f));	// 8
+	
 	// Building triangles
 	// Front face		1	2
 	// 1 - 2 - 4

@@ -15,11 +15,7 @@ MeshComponent::~MeshComponent()
 }
 
 void MeshComponent::Update(const float& _deltaTime)
-{
-	
-}
+{}
 
 void MeshComponent::Render(CharTexture* _texture)
-{
-	
-}
+{}

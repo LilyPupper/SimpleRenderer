@@ -1,10 +1,12 @@
 #pragma once
 
-#include "Vec3.h"
-#include "Tri.h"
-
 #include <vector>
 #include <string>
+
+#include <vec4.hpp>
+
+class Vertex;
+class Tri;
 
 class Mesh
 {
@@ -16,6 +18,6 @@ public:
 	void LoadCube();
 
 	std::string m_Name;
-	std::vector<Vec3> m_Vertices;
+	std::vector<Vertex> m_Vertices;
 	std::vector<Tri> m_Triangles;
 };

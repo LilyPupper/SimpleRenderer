@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Tri.h"
-#include "Vec3.h"
+class Tri;
+
+#include <glm.hpp>
 
 namespace Physics
 {
-    bool IntersectRayTriangle(const Vec3& _origin, const Vec3& _dir, const Tri& _tri, float& _baryX, float& _baryY, float& distance);
+    bool IntersectRayTriangle(glm::vec3 _origin, glm::vec3 _dir, Tri _tri, float& _baryX, float& _baryY, float& distance);
 }

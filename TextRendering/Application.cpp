@@ -1,8 +1,7 @@
 #include "Application.h"
 
-#include "Component.h"
-#include "TransformComponent.h"
 #include "RotatingModel.h"
+#include "TransformComponent.h"
 #include "Mesh.h"
 
 #include <iostream>
@@ -15,7 +14,7 @@ Application::Application(const int& _width, const int& _height)
 {
 	// Set console size
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SMALL_RECT rect = { 0, 0, _width, _height };
+	SMALL_RECT rect = { 0, 0, (short)_width, (short)_height};
 	SetConsoleWindowInfo(hConsole, TRUE, &rect);
 
 	// Create Screen Buffer
@@ -35,10 +34,7 @@ Application::Application(const int& _width, const int& _height)
 	}
 
 	// Add objects here
-	RotatingModel* rt1 = new RotatingModel("Fox.obj");
-	TransformComponent* transform1 = static_cast<TransformComponent*>(rt1->FindComponentOfType(TRANSFORM));
-	if (transform1)
-		transform1->m_Position = Vec3(60.0f, 15.0f, 0.0f);
+	RotatingModel* rt1 = new RotatingModel("Torus_Low.obj");
 	m_Objects.push_back(rt1);
 }
 
@@ -67,7 +63,6 @@ void Application::Run()
 	// Time
 	const clock_t start_time = clock();
 	clock_t begin_frame = start_time;
-	clock_t end_frame;
 	float deltaTime;
 	const float frameTime = 1.0f / m_FPS;
 
@@ -109,7 +104,7 @@ void Application::Run()
 				}
 				else if (m_RenderTex[y][x].Data == 1)
 				{
-					WORD attr = m_RenderTex[y][x].Color;
+					WORD attr = FOREGROUND_GREEN;
 					WriteConsoleOutputAttribute(m_Console, &attr, 1, c, &dwBytesWritten);
 					WriteToScreen(x, y, L'#');
 				}

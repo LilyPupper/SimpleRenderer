@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Component.h"
-#include "Mat3.h"
-#include "Vec3.h"
 
 #include <vector>
 #include <future>
@@ -15,17 +13,10 @@ enum RENDER_MODE
 	MULTI
 };
 
-enum MESH_COLOUR
-{
-	BLUE = 0,
-	GREEN = 1,
-	RED = 2
-};
-
 class MeshRendererComponent : public Component
 {
 public:
-	MeshRendererComponent(Object* _owner);
+	MeshRendererComponent(Object* _owner, const RENDER_MODE& _mode = MULTI);
 	~MeshRendererComponent();
 
 	virtual void Update(const float& _deltaTime);
@@ -35,15 +26,11 @@ public:
 	void Render_Async(CharTexture* _texture, const Mesh* _mesh);
 	void RenderRow(CharTexture* _texture, const Mesh* _mesh, unsigned int _row);
 
+	void RenderPixel(CharTexture* _texture, const Mesh* _mesh, unsigned int _column, unsigned int _row);
+
 	inline void SetRenderMode(const RENDER_MODE& _mode) { m_Mode = _mode; }
 
 private:
-	Mat3 m_Projection;
-	Vec3 m_RotAngles;
-	float m_Scale;
-
-	float m_Time;
-
 	// Render mode
 	RENDER_MODE m_Mode = RENDER_MODE::SINGLE;
 

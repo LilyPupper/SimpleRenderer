@@ -2,38 +2,32 @@
 
 #include <math.h>
 
-Tri::Tri(const Vec3& _v1, const Vec3& _v2, const Vec3& _v3)
-	: v1(_v1), v2(_v2), v3(_v3)
+#include <mat4x4.hpp>
+
+Tri::Tri(const glm::vec3& _v1, const glm::vec3& _v2, const glm::vec3& _v3)
+	: v1(_v1), v2(_v2), v3(_v3), m_SurfaceNormal(glm::vec3())
 {}
 
 Tri::~Tri()
 {}
 
-void Tri::RotatePoints(Vec3 _axis, float _theta)
+void Tri::RecalculateSurfaceNormal()
 {
-	v1.Rotate(_axis, _theta);
-	v2.Rotate(_axis, _theta);
-	v3.Rotate(_axis, _theta);
+	glm::vec3 x = glm::vec3(v1.x, v1.y, v1.z) - glm::vec3(v2.x, v2.y, v2.z);
+	glm::vec3 y = glm::vec3(v2.x, v2.y, v2.z) - glm::vec3(v3.x, v3.y, v3.z);
+	m_SurfaceNormal = glm::normalize(glm::cross(x, y));;
 }
 
-Vec3 Tri::GetSurfaceNormal() const
+glm::vec3 Tri::GetSurfaceNormal() const
 {
-	return Vec3::Cross(v1 - v2, v2 - v3).Normalized();
+	return m_SurfaceNormal;
 }
 
-void Tri::operator=(const Tri& _other)
+Tri Tri::operator*(glm::mat4& _m) const
 {
-	v1 = _other.v1;
-	v2 = _other.v2;
-	v3 = _other.v3;
-}
+	glm::vec3 _v1 = glm::vec4((glm::vec3)v1, 1.0f) * _m;
+	glm::vec3 _v2 = glm::vec4((glm::vec3)v2, 1.0f) * _m;
+	glm::vec3 _v3 = glm::vec4((glm::vec3)v3, 1.0f) * _m;
 
-Tri Tri::operator+(const Vec3& _v) const
-{
-	return Tri(v1 + _v, v2 + _v, v3 + _v);
-}
-
-Tri Tri::operator*(const float& _value) const
-{
-	return Tri(v1 * _value, v2 * _value, v3 * _value);
+	return Tri(_v1, _v2, _v3);
 }

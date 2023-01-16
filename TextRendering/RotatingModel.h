@@ -12,4 +12,7 @@ public:
 
 	virtual void Update(const float& _deltaTime);
 	virtual void Render(CharTexture* _texture);
+
+private:
+	float m_Time;
 };

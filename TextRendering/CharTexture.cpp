@@ -4,14 +4,14 @@
 #include <iostream>
 
 PixelData::PixelData()
-	: Data(0), Depth(1000000.0f), Color(0)
+	: Data(0), Depth(1000000.0f)
 {}
 
 PixelData::~PixelData()
 {}
 
 CharTexture_Accessor::CharTexture_Accessor(const CharTexture* _owner)
-	: m_Owner(_owner)
+	: m_Owner(_owner), m_Texture(nullptr)
 {}
 
 PixelData& CharTexture_Accessor::operator[](const unsigned int& _index)
@@ -41,7 +41,6 @@ void CharTexture::Clear()
 	{
 		m_Texture[i].Data = 0;
 		m_Texture[i].Depth = 1000000.0f;
-		m_Texture[i].Color = 0;
 	}
 }
 
