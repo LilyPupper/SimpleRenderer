@@ -32,8 +32,8 @@ project "TextRendering"
 
 	postbuildcommands
 	{
-		"{MKDIR} %{wks.location}/bin/%{cfg.buildcfg}/%{cfg.platform}/models",
-		"{COPYFILE} %{wks.location}/models/*.obj %{wks.location}/bin/%{cfg.buildcfg}/%{cfg.platform}/models"
+		"{MKDIR} %{wks.location}bin/%{cfg.buildcfg}/%{cfg.platform}/models",
+		"{COPYFILE} %{wks.location}models/*.obj %{wks.location}bin/%{cfg.buildcfg}/%{cfg.platform}/models"
 	}
 
 	filter "configurations:Debug"
