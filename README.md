@@ -15,3 +15,5 @@ Just clone the repo, run 'Generate_VS2022_Project.bat', build, and run!
 
 ## Contact
 Lily Raeburn - [![LinkedIn][linkedin-shield]][https://www.linkedin.com/in/lilyraeburn/] - LilyRaeburn@outlook.com
+
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
