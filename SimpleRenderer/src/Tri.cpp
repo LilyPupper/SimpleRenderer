@@ -1,8 +1,7 @@
 #include "Tri.h"
 
 #include <math.h>
-
-#include <mat4x4.hpp>
+#include <glm.hpp>
 
 Tri::Tri(const glm::vec3& _v1, const glm::vec3& _v2, const glm::vec3& _v3)
 	: v1(_v1), v2(_v2), v3(_v3), m_SurfaceNormal(glm::vec3())
@@ -24,6 +23,15 @@ glm::vec3 Tri::GetSurfaceNormal() const
 }
 
 Tri Tri::operator*(glm::mat4& _m) const
+{
+	glm::vec3 _v1 = glm::vec4((glm::vec3)v1, 1.0f) * _m;
+	glm::vec3 _v2 = glm::vec4((glm::vec3)v2, 1.0f) * _m;
+	glm::vec3 _v3 = glm::vec4((glm::vec3)v3, 1.0f) * _m;
+
+	return Tri(_v1, _v2, _v3);
+}
+
+Tri Tri::operator*(const glm::mat4& _m) const
 {
 	glm::vec3 _v1 = glm::vec4((glm::vec3)v1, 1.0f) * _m;
 	glm::vec3 _v2 = glm::vec4((glm::vec3)v2, 1.0f) * _m;

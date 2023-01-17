@@ -5,7 +5,6 @@
 
 class Object;
 class Component;
-class CharTexture;
 class TransformComponent;
 enum COMPONENT_TYPE;
 
@@ -18,7 +17,7 @@ public:
 	~Object();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render(CharTexture*  _texture);
+	virtual void Render();
 
 	void AddComponent(Component* _component);
 	Component* FindComponentOfType(COMPONENT_TYPE _type);

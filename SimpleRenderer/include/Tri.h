@@ -1,8 +1,6 @@
 #pragma once
 
 #include <glm.hpp>
-#include <vec3.hpp>
-#include <vec4.hpp>
 
 #include "Vertex.h"
 
@@ -16,6 +14,7 @@ public:
 	glm::vec3 GetSurfaceNormal() const;
 	
 	Tri operator*(glm::mat4& _m) const;
+	Tri operator*(const glm::mat4& _m) const;
 
 	Vertex v1;
 	Vertex v2;

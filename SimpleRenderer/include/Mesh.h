@@ -2,8 +2,7 @@
 
 #include <vector>
 #include <string>
-
-#include <vec4.hpp>
+#include <glm.hpp>
 
 class Vertex;
 class Tri;
@@ -14,8 +13,7 @@ public:
 	Mesh();
 	~Mesh();
 
-	bool Load(const char* _filePath);
-	void LoadCube();
+	const char* m_MeshID;
 
 	std::string m_Name;
 	std::vector<Vertex> m_Vertices;

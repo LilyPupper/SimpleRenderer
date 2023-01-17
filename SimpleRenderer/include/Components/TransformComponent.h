@@ -12,7 +12,7 @@ public:
 	~TransformComponent();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render(CharTexture* _texture);
+	virtual void Render();
 
 	void SetScale(const float& _scale);
 	void SetScale(const float& _x, const float& _y, const float& _z);

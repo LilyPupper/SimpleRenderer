@@ -1,7 +1,5 @@
 #include "Components/Component.h"
 
-#include "CharTexture.h"
-
 Component::Component(Object* _owner)
 	: m_Owner(_owner)
 {}

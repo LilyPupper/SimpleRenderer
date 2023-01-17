@@ -1,21 +1,20 @@
 #include "Objects/RotatingModel.h"
 
-#include "Mesh.h"
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/MeshRendererComponent.h"
+#include "Renderer/Renderer.h"
 
-RotatingModel::RotatingModel(const char* _filepath)
-	: m_Time(0.0f)
+RotatingModel::RotatingModel(Renderer* _renderer, const char* _filepath)
+	: m_Renderer(_renderer), m_Time(0.0f)
 {
-	AddComponent(new MeshRendererComponent(this));
+	AddComponent(new MeshRendererComponent(this, m_Renderer));
 
 	// Load mesh
-	Mesh* mesh = new Mesh();
-	bool loaded = mesh->Load(_filepath);
+	const char* meshID = m_Renderer->LoadMesh(_filepath);
 
 	// Attach mesh as component
-	AddComponent(new MeshComponent(this, mesh));
+	AddComponent(new MeshComponent(this, meshID));
 }
 
 RotatingModel::~RotatingModel()
@@ -46,7 +45,7 @@ void RotatingModel::Update(const float& _deltaTime)
 	}
 }
 
-void RotatingModel::Render(CharTexture* _texture)
+void RotatingModel::Render()
 {
-	Object::Render(_texture);
+	Object::Render();
 }

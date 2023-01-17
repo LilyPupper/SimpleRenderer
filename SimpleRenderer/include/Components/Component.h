@@ -2,7 +2,6 @@
 
 #include "Objects/Object.h"
 
-class CharTexture;
 class TransformComponent;
 enum COMPONENT_TYPE
 {
@@ -18,7 +17,7 @@ public:
 	~Component();
 
 	virtual void Update(const float& _deltaTime) = 0;
-	virtual void Render(CharTexture* _texture) = 0;
+	virtual void Render() = 0;
 
 	COMPONENT_TYPE GetComponentType();
 	Object* GetOwner();

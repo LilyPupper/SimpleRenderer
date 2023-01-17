@@ -2,17 +2,19 @@
 
 #include "Object.h"
 
+class Renderer;
 class CharTexture;
 
 class RotatingModel : public Object
 {
 public:
-	RotatingModel(const char* _filepath);
+	RotatingModel(Renderer* _renderer, const char* _filepath);
 	~RotatingModel();
 
 	virtual void Update(const float& _deltaTime);
-	virtual void Render(CharTexture* _texture);
+	virtual void Render();
 
 private:
 	float m_Time;
+	Renderer* m_Renderer;
 };

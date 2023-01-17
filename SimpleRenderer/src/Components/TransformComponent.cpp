@@ -1,7 +1,5 @@
 #include "Components/TransformComponent.h"
 
-#include "CharTexture.h"
-
 TransformComponent::TransformComponent(Object* _owner)
 	: Component(_owner), m_Translation(glm::vec3()), m_Rotation(glm::identity<glm::quat>()), m_Scale(glm::vec3()), m_Transformation(glm::identity<glm::mat4>()), m_RebuildMatrix(true)
 {
@@ -14,7 +12,7 @@ TransformComponent::~TransformComponent()
 void TransformComponent::Update(const float& _deltaTime)
 {}
 
-void TransformComponent::Render(CharTexture* _texture)
+void TransformComponent::Render()
 {}
 
 void TransformComponent::SetScale(const float& _scale)

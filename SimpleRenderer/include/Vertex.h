@@ -1,8 +1,6 @@
 #pragma once
 
 #include <glm.hpp>
-#include <vec3.hpp>
-#include <vec4.hpp>
 
 class Vertex
 {

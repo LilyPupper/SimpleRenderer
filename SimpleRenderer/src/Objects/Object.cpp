@@ -2,7 +2,6 @@
 
 #include "Components/Component.h"
 #include "Components/TransformComponent.h"
-#include "CharTexture.h"
 
 unsigned int Object::s_ObjectIDCount = 0;
 OBJECT_MAP Object::s_ObjectList;
@@ -29,11 +28,11 @@ void Object::Update(const float& _deltaTime)
 	}
 }
 
-void Object::Render(CharTexture* _texture)
+void Object::Render()
 {
 	for (unsigned int i = 0; i < m_Components.size(); ++i)
 	{
-		m_Components[i]->Render(_texture);
+		m_Components[i]->Render();
 	}
 }
 
