@@ -11,7 +11,7 @@ RotatingModel::RotatingModel(Renderer* _renderer, const char* _filepath)
 	AddComponent(new MeshRendererComponent(this, m_Renderer));
 
 	// Load mesh
-	const char* meshID = m_Renderer->LoadMesh(_filepath);
+	const char* meshID = m_Renderer->RegisterMesh(_filepath);
 
 	// Attach mesh as component
 	AddComponent(new MeshComponent(this, meshID));

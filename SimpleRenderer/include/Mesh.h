@@ -13,6 +13,8 @@ public:
 	Mesh();
 	~Mesh();
 
+	void RecalculateSurfaceNormals();
+
 	const char* m_MeshID;
 
 	std::string m_Name;

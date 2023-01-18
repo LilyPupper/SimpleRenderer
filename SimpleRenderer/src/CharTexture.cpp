@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <limits>
 
 PixelData::PixelData()
 	: Data(0), Depth(1000000.0f)
@@ -40,7 +41,7 @@ void CharTexture::Clear()
 	for (unsigned int i = 0; i < m_Length; ++i)
 	{
 		m_Texture[i].Data = 0;
-		m_Texture[i].Depth = 1000000.0f;
+		m_Texture[i].Depth = std::numeric_limits<float>::max();
 	}
 }
 

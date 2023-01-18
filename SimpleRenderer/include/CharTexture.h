@@ -6,7 +6,7 @@ public:
 	PixelData();
 	~PixelData();
 
-	int Data;
+	wchar_t Data;
 	float Depth;
 };
 

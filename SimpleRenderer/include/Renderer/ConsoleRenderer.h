@@ -6,6 +6,7 @@
 #include <glm.hpp>
 #include <Windows.h>
 #include <future>
+#include <mutex>
 
 enum RENDER_MODE
 {
@@ -20,11 +21,9 @@ public:
 	virtual ~ConsoleRenderer() override;
 
 	virtual bool Initialise() override;
-	virtual const char* LoadMesh(const char* _meshPath) override;
-	virtual const char* LoadCube();
+	virtual const char* RegisterMesh(const char* _meshPath) override;
 	virtual void DrawMesh(const char* _modelReference, const glm::mat4& _modelMatrix) override;
-	virtual void Render(const float& _deltaTime) override;
-	virtual void Flush() override;
+	virtual void Flush(const float& _deltaTime) override;
 
 	void Render_Single(const Mesh* _mesh, const glm::mat4& _modelMatrix);
 	void Render_Async(const Mesh* _mesh, const glm::mat4& _modelMatrix);
@@ -35,14 +34,11 @@ public:
 	void WriteToScreen(int _row, int _col, const std::wstring& _s);
 
 protected:
-	virtual Mesh* LoadMeshFromFile(const char* _meshPath) override;
-
-	// Render mode
-	RENDER_MODE m_Mode = RENDER_MODE::MULTI;
-
-	// Async
 	std::vector<std::future<void>> m_Futures;
+	std::mutex m_Lock;
 
+	// Render parameters
+	RENDER_MODE m_Mode = RENDER_MODE::MULTI;
 	const int m_Width, m_Height;
 	CharTexture m_RenderTex;
 	bool m_VSync = false;
