@@ -23,6 +23,6 @@ void MeshRendererComponent::Render()
 	TransformComponent* t = GetTransform();
 	if (meshComp && meshComp->IsActive() && t)
 	{
-		m_Renderer->DrawMesh(meshComp->GetMeshID(), t->GetTransformation());
+		m_Renderer->DrawMesh(meshComp->GetMeshID(), t);
 	}
 }

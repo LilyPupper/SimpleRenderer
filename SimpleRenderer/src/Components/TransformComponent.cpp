@@ -1,7 +1,7 @@
 #include "Components/TransformComponent.h"
 
 TransformComponent::TransformComponent(Object* _owner)
-	: Component(_owner), m_Translation(glm::vec3()), m_Rotation(glm::identity<glm::quat>()), m_Scale(glm::vec3()), m_Transformation(glm::identity<glm::mat4>()), m_RebuildMatrix(true)
+	: Component(_owner), m_Translation(glm::vec3()), m_Rotation(glm::identity<glm::quat>()), m_Scale(glm::vec3()), m_TransformationMatrix(glm::identity<glm::mat4>()), m_RebuildMatrix(true)
 {
 	m_Type = TRANSFORM;
 }
@@ -87,16 +87,6 @@ void TransformComponent::Translate(const float& _x, const float& _y, const float
 	m_RebuildMatrix = true;
 }
 
-glm::vec3 TransformComponent::GetScale() const
-{
-	return m_Scale;
-}
-
-glm::vec3 TransformComponent::GetPosition() const
-{
-	return m_Translation;
-}
-
 glm::vec3 TransformComponent::GetEuler() const
 {
 	return glm::eulerAngles(m_Rotation);
@@ -104,23 +94,23 @@ glm::vec3 TransformComponent::GetEuler() const
 
 void TransformComponent::RebuildTransformation()
 {
-	glm::mat4 scale(
+	m_ScaleMatrix = glm::mat4(
 		m_Scale.x, 0.0f, 0.0f, 0.0f,
 		0.0f, m_Scale.y, 0.0f, 0.0f,
 		0.0f, 0.0f, m_Scale.z, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	glm::mat4 rotation = glm::toMat4(m_Rotation);
+	m_RotationMatrix = glm::toMat4(m_Rotation);
 
-	glm::mat4 translation(
+	m_TranslationMatrix = glm::mat4(
 		1.0f, 0.0f, 0.0f, m_Translation.x,
 		0.0f, 1.0f, 0.0f, m_Translation.y,
 		0.0f, 0.0f, 1.0f, m_Translation.z,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	m_Transformation = scale * rotation * translation;
+	m_TransformationMatrix = m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix;
 
 	m_RebuildMatrix = false;
 }
@@ -130,5 +120,5 @@ glm::mat4 TransformComponent::GetTransformation()
 	if (m_RebuildMatrix)
 		RebuildTransformation();
 
-	return m_Transformation;
+	return m_TransformationMatrix;
 }

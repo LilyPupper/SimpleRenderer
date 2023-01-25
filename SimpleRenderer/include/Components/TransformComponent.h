@@ -28,9 +28,14 @@ public:
 	void SetPosition(const float& _x, const float& _y, const float& _z);
 	void Translate(const float& _x, const float& _y, const float& _z);
 
-	glm::vec3 GetScale() const;
-	glm::vec3 GetPosition() const;
+	inline glm::vec3 GetScale() const { return m_Scale; }
+	inline glm::mat4 GetScaleMatrix() const { return m_ScaleMatrix; }
+	
+	inline glm::vec3 GetPosition() const { return m_Translation; }
+	inline glm::mat4 GetPositionMatrix() const { return m_TransformationMatrix; }
+
 	glm::vec3 GetEuler() const;
+	inline glm::mat4 GetRotationMatrix() const { return m_RotationMatrix; }
 
 	void RebuildTransformation();
 	glm::mat4 GetTransformation();
@@ -40,7 +45,11 @@ private:
 	glm::quat m_Rotation;
 	glm::vec3 m_Scale;
 
-	glm::mat4 m_Transformation;
+	glm::mat4 m_TranslationMatrix;
+	glm::mat4 m_RotationMatrix;
+	glm::mat4 m_ScaleMatrix;
+
+	glm::mat4 m_TransformationMatrix;
 
 	bool m_RebuildMatrix;
 };

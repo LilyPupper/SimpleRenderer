@@ -33,15 +33,15 @@ void RotatingModel::Update(const float& _deltaTime)
 	TransformComponent* t = static_cast<TransformComponent*>(FindComponentOfType(TRANSFORM));
 	if (t != nullptr)
 	{
-		glm::vec3 scale = t->GetScale() - (sinf(m_Time) * 0.05f);
-		t->SetScale(scale.x, scale.y, scale.z);
-
+		//glm::vec3 scale = t->GetScale() - (sinf(m_Time) * 0.5f);
+		//t->SetScale(scale.x, scale.y, scale.z);
+		
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
-		t->SetRotation(r * m_Time * 1.0f);
+		t->SetRotation(r * m_Time * 0.5f);
 
-		float x = sinf(m_Time) * 0.1f;
-		glm::vec3 pos = t->GetPosition();
-		t->SetPosition(pos.x + x, pos.y, pos.z);
+		//float x = sinf(m_Time);
+		//glm::vec3 pos = t->GetPosition();
+		//t->SetPosition(pos.x + x, pos.y, pos.z);
 	}
 }
 

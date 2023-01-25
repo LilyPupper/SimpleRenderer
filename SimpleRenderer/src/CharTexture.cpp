@@ -36,6 +36,18 @@ CharTexture::~CharTexture()
 	delete[] m_Texture;
 }
 
+void CharTexture::SetData(wchar_t* const _data)
+{
+	for (unsigned int y = 0; y < m_Height; ++y)
+	{
+		for (unsigned int x = 0; x < m_Width; ++x)
+		{
+			unsigned int index = x + y * m_Width;
+			m_Texture[index].Data = _data[index];
+		}
+	}
+}
+
 void CharTexture::Clear()
 {
 	for (unsigned int i = 0; i < m_Length; ++i)

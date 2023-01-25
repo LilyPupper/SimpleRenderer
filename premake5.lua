@@ -7,6 +7,7 @@ project "SimpleRenderer"
 	location "SimpleRenderer"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	staticruntime "on"
 	systemversion "latest"
 

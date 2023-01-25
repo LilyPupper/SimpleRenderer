@@ -18,6 +18,6 @@ public:
 	const char* m_MeshID;
 
 	std::string m_Name;
-	std::vector<Vertex> m_Vertices;
+	std::vector<glm::vec3> m_Vertices;
 	std::vector<Tri> m_Triangles;
 };

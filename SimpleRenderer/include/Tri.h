@@ -2,8 +2,6 @@
 
 #include <glm.hpp>
 
-#include "Vertex.h"
-
 class Tri
 {
 public:
@@ -15,11 +13,12 @@ public:
 	
 	Tri operator*(glm::mat4& _m) const;
 	Tri operator*(const glm::mat4& _m) const;
+	void operator*=(const glm::mat4& _m);
 
-	Vertex v1;
-	Vertex v2;
-	Vertex v3;
+	glm::vec4 v1;
+	glm::vec4 v2;
+	glm::vec4 v3;
 
 private:
-	glm::vec3 m_SurfaceNormal;
+	glm::vec4 m_SurfaceNormal;
 };

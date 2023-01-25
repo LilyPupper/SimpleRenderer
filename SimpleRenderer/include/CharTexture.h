@@ -38,6 +38,8 @@ public:
 	inline unsigned int GetWidth() { return m_Width; }
 	inline unsigned int GetHeight() { return m_Height; }
 
+	void SetData(wchar_t* const _data);
+
 	void Clear();
 	
 	void Debug();

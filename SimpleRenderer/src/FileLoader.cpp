@@ -2,7 +2,6 @@
 
 #include "Mesh.h"
 #include "Tri.h"
-#include "Vertex.h"
 
 #include <Windows.h>
 #include <fstream>
@@ -46,7 +45,7 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 				float y = std::stof(nextWord);
 				iss >> nextWord;
 				float z = std::stof(nextWord);
-				mesh->m_Vertices.push_back(Vertex(x, y, z));
+				mesh->m_Vertices.push_back(glm::vec3(x, y, z));
 			}
 			else if (firstWord == "f")
 			{
