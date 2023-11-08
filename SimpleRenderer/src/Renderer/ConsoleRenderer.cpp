@@ -5,6 +5,8 @@
 #include "Physics.h"
 #include "FileLoader.h"
 
+#include "Debug/Timer.h"
+
 #include "Components/TransformComponent.h"
 
 #include <iostream>
@@ -15,54 +17,138 @@
 #include <algorithm>
 #include <execution>
 
-ConsoleRenderer::ConsoleRenderer(const unsigned int& _width, const unsigned int& _height)
-	: m_Width(_width), m_Height(_height), m_RenderTex(_width, _height), m_ScreenBuffer(nullptr), m_Console(INVALID_HANDLE_VALUE)
-{
-	m_ImageData = new wchar_t[_width * _height];
-	m_DepthData = new float[_width * _height];
+#include "Objects/Camera.h"
 
-	m_ImageHorizontalIter.resize(_width);
+ConsoleRenderer::ConsoleRenderer(const unsigned int& _width, const unsigned int& _height)
+	: Width(_width)
+	, Height(_height)
+	, ConsoleBuffer(nullptr)
+	, Console(INVALID_HANDLE_VALUE)
+	, ThreadPool(std::thread::hardware_concurrency())
+{
+	CurrentScreenBufferIndex = 0;
+	PreviousScreenBufferIndex = 0;
+
+	for (unsigned int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
+	{
+		ScreenBuffers[i] = new wchar_t[_width * _height];
+	}
+	DepthData = new float[_width * _height];
+
+	ImageHorizontalIter.resize(_width);
 	m_ImageVerticalIter.resize(_height);
 	for (unsigned int i = 0; i < _width; ++i)
-		m_ImageHorizontalIter[i] = i;
+		ImageHorizontalIter[i] = i;
 	for (unsigned int i = 0; i < _height; ++i)
 		m_ImageVerticalIter[i] = i;
 
 	srand(1);
+
+	Futures.resize(std::thread::hardware_concurrency());
+
+	bRenderThreadContinue = true;
+	bIsScreenBufferReady = false;
+
+	RenderMode = RENDER_MODE::Rasterize;
+	bMultithreaded = true;
+
+	ThreadPool.enqueue([this]()
+	{
+		while(bRenderThreadContinue)
+		{
+			while(!bIsScreenBufferReady)
+			{
+				Sleep(5);
+			}
+			PushToScreen(0.0f);
+			bIsScreenBufferReady = false;
+		}
+	});
+
+	Initialise();
 }
 
 ConsoleRenderer::~ConsoleRenderer()
 {
+	bRenderThreadContinue = false;
+
 	for (std::map<const char*, Mesh*>::iterator itr = m_RegisteredModels.begin(); itr != m_RegisteredModels.end(); itr++)
 	{
 		delete itr->second;
 	}
 
-	delete[] m_ScreenBuffer;
-	delete[] m_ImageData;
-	delete[] m_DepthData;
+	for (unsigned int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
+	{
+		delete[] ScreenBuffers[i];
+	}
+	delete[] DepthData;
 }
 
-bool ConsoleRenderer::ConsoleRenderer::Initialise()
+bool ConsoleRenderer::Initialise()
 {
-	// Set console size
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SMALL_RECT rect = { 0, 0, (short)m_Width, (short)m_Height };
-	SetConsoleWindowInfo(hConsole, TRUE, &rect);
+	// Set font size
+	const HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hStdOut != NULL)
+	{
+		CONSOLE_FONT_INFOEX fontInfo;
+		fontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
+		if (GetCurrentConsoleFontEx(hStdOut, FALSE, &fontInfo))
+		{
+			if (Width > 240 || Height > 80)
+			{
+				const float aspectRatio = Width / Height;
+				const int newHeight = aspectRatio * Height;
+			
+				float scale = 0.f;
+				if (Width >= newHeight)
+				{
+					scale = 240.f/Width;
+				}
+				else
+				{
+					scale = 80.f/Height;
+				}
+			
+				fontInfo.dwFontSize.X *= scale;
+				fontInfo.dwFontSize.Y *= scale;
+			}
+			else
+			{
+				fontInfo.dwFontSize.X = 16;
+				fontInfo.dwFontSize.Y = 16;
+			}
+	
+			if (!SetCurrentConsoleFontEx(hStdOut, FALSE, &fontInfo))
+			{
+				std::cerr << "CreateConsoleScreenBuffer win error: " << GetLastError() << '\n';
+				return false;
+			}
+		}
+	}
+
+	// Set terminal rows/columns
+	std::string sizeCommand = "mode con cols=" + std::to_string(Width) + " lines=" + std::to_string(Height);
+	system(sizeCommand.c_str());
 
 	// Create Screen Buffer
-	m_ScreenBuffer = new wchar_t[m_Width * m_Height];
-	std::fill_n(m_ScreenBuffer, m_Width * m_Height, L'a');
+	ConsoleBuffer = new wchar_t[Width * Height];
+	std::fill_n(ConsoleBuffer, Width * Height, L'a');
 
-	m_Console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	if (m_Console == INVALID_HANDLE_VALUE)
+	Console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	if (Console == INVALID_HANDLE_VALUE)
 	{
 		std::cerr << "CreateConsoleScreenBuffer win error: " << GetLastError() << '\n';
 		return false;
 	}
-	if (!SetConsoleActiveScreenBuffer(m_Console))
+	if (!SetConsoleActiveScreenBuffer(Console))
 	{
 		std::cerr << "CreateConsoleScreenBuffer win error: " << GetLastError() << '\n';
+		return false;
+	}
+	COORD screenBufferSize = {(SHORT)Width, (SHORT)Height};
+	if (!SetConsoleScreenBufferSize(Console, screenBufferSize))
+	{
+		std::cerr << "SetConsoleScreenBufferSize win error: " << GetLastError() << '\n';
 		return false;
 	}
 
@@ -89,78 +175,102 @@ void ConsoleRenderer::DrawMesh(const char* _modelReference, TransformComponent* 
 	m_ObjectsToRender.push_back(std::make_pair(_modelReference, _transform));
 }
 
-void ConsoleRenderer::Flush(const float& _deltaTime)
-{
-	// RENDER
-#if defined(RENDERMODE_RAYCAST)
-	RenderRaycast();
-#elif defined(RENDERMODE_RASTERIZE)
-	RenderRasterize();
-#endif
-	m_ObjectsToRender.clear();
-
-	// Border string
-	std::wstring border;
-	for (unsigned int i = 0; i < m_RenderTex.GetWidth(); ++i)
-		border += L"-";
-
-	// Drawing the char map
-	DWORD dwBytesWritten = 0;
-	for (unsigned int y = 0; y < m_RenderTex.GetWidth(); ++y)
+void ConsoleRenderer::Render(const float& _deltaTime)
+{ 
+	switch(RenderMode)
 	{
-		for (unsigned int x = 0; x < m_RenderTex.GetHeight(); ++x)
+		case Rasterize:
 		{
-			COORD c;
-			c.X = y;
-			c.Y = x;
-			if (m_RenderTex[y][x].Data == 0)
-			{
-				WriteToScreen(x, y, L' ');
-			}
-			else
-			{
-				WORD attr = FOREGROUND_GREEN;
-				WriteConsoleOutputAttribute(m_Console, &attr, 1, c, &dwBytesWritten);
-				WriteToScreen(x, y, m_RenderTex[y][x].Data);
-			}
+			RenderRasterize();
+		}
+		case Raytrace:
+		{
+			RenderRaycast();
 		}
 	}
 
-	WriteToScreen(0, 0, border);
-	WriteToScreen(m_RenderTex.GetHeight() - 2, 0, L"MS: " + std::to_wstring((int)(_deltaTime * 1000.0f)));
-	WriteToScreen(m_RenderTex.GetHeight() - 1, 0, L"FPS: " + std::to_wstring(1.0f / _deltaTime));
+	m_ObjectsToRender.clear();
 
-	WriteConsoleOutputCharacter(m_Console, m_ScreenBuffer, m_RenderTex.GetWidth() * m_RenderTex.GetHeight(), { 0,0 }, &dwBytesWritten);
+	if(!bIsScreenBufferReady)
+	{
+		bIsScreenBufferReady = true;
+		NextScreenBuffer();
+	}
+}
 
-	m_RenderTex.Clear();
+void ConsoleRenderer::PushToScreen(const float& _deltaTime)
+{
+	DWORD dwBytesWritten;
+	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
 }
 
 // https://youtu.be/1KTgc2SEt50
 // https://github.com/TheCherno/RayTracing/blob/master/RayTracing/src
-#pragma region RAYCAST
 void ConsoleRenderer::RenderRaycast()
 {
-#if MULTITHREAD
-	std::for_each(std::execution::par, m_ImageVerticalIter.begin(), m_ImageVerticalIter.end(),
-		[this](unsigned int y)
-		{
-			std::for_each(std::execution::par, m_ImageHorizontalIter.begin(), m_ImageHorizontalIter.end(),
-				[this, y](unsigned int x)
-				{
-					m_ImageData[x + y * m_Width] = RaycastPixel(x, y);
-				});
-		});
-#else
-	for (unsigned int y = 0; y < m_RenderTex.GetHeight(); ++y)
+	wchar_t* currentScreenBuffer = GetCurrentScreenBuffer();
+
+	if(bMultithreaded)
 	{
-		for (unsigned int x = 0; x < m_RenderTex.GetWidth(); ++x)
+		std::for_each(std::execution::par_unseq, m_ImageVerticalIter.begin(), m_ImageVerticalIter.end(),
+			[this, &currentScreenBuffer](unsigned int y)
+			{
+				std::for_each(std::execution::par_unseq, ImageHorizontalIter.begin(), ImageHorizontalIter.end(),
+					[this, &currentScreenBuffer, &y](unsigned int x)
+					{
+						currentScreenBuffer[x + y * Width] = RaycastPixel(x, y);
+					});
+			});
+
+		//Futures.clear();
+		//for (unsigned int y = 0; y < RenderTex.GetHeight(); ++y)
+		//{
+		//	for(int x = 0; x<RenderTex.GetWidth(); ++x)
+		//	{
+		//		Futures.push_back(ThreadPool.enqueue([this, x, y, currentScreenBuffer]()
+		//		{
+		//
+		//				currentScreenBuffer[x + y * Width] = RaycastPixel(x, y);
+		//		}));
+		//	}
+		//}
+		//for(const std::future<void>& future : Futures)
+		//{
+		//	future.wait();
+		//}
+
+		//const int increment = Height / std::thread::hardware_concurrency();
+		//int i=0;
+		//for (unsigned int y = 0; y < Height; y+=increment)
+		//{
+		//	Futures[i++] = (ThreadPool.enqueue([increment, this, y, currentScreenBuffer]()
+		//	{
+		//
+		//		for(int newY = y; newY<y+increment; newY++)
+		//		{
+		//			for(int x = 0; x < Width; x++)
+		//			{
+		//				currentScreenBuffer[x + newY * Width] = RaycastPixel(x, newY);
+		//			}
+		//		}
+		//	}));
+		//}
+		//for(const auto& future : Futures)
+		//{
+		//	future.wait();
+		//}
+	}
+	// Single-threaded
+	else
+	{
+		for (unsigned int y = 0; y < Height; ++y)
 		{
-			m_ImageData[x + y * m_Width] = RaycastPixel(x, y);
+			for (unsigned int x = 0; x < Width; ++x)
+			{
+				currentScreenBuffer[x + y * Width] = RaycastPixel(x, y);
+			}
 		}
 	}
-#endif
-
-	m_RenderTex.SetData(m_ImageData);
 }
 
 wchar_t ConsoleRenderer::RaycastPixel(unsigned int _column, unsigned int _row)
@@ -226,71 +336,80 @@ wchar_t ConsoleRenderer::RaycastPixel(unsigned int _column, unsigned int _row)
 
 	return result;
 }
-#pragma endregion
 
-#pragma region RASTERIZE
 void ConsoleRenderer::RenderRasterize()
 {
-	std::fill_n(m_ImageData, m_Width * m_Height, 0);
+	wchar_t* currentImageData = GetCurrentScreenBuffer();
+
+	// Reset depth texture
+	std::fill_n(currentImageData, Width * Height, 0);
 	constexpr float float_max = (std::numeric_limits<float>::max());
-	std::fill_n(m_DepthData, m_Width * m_Height, float_max);
+	std::fill_n(DepthData, Width * Height, float_max);
 
-#if MULTITHREAD
-	std::vector<unsigned int> m_ObjectIter;
-	m_ObjectIter.resize(m_ObjectsToRender.size());
-	for (unsigned int i = 0; i < m_ObjectsToRender.size(); ++i)
-		m_ObjectIter[i] = i;
+	if (bMultithreaded)
+	{
+		std::vector<unsigned int> m_ObjectIter;
+		m_ObjectIter.resize(m_ObjectsToRender.size());
+		for (unsigned int i = 0; i < m_ObjectsToRender.size(); ++i)
+			m_ObjectIter[i] = i;
 
 
-	std::for_each(std::execution::par, m_ObjectIter.begin(), m_ObjectIter.end(),
-		[this](unsigned int meshIndex)
+		std::for_each(std::execution::par_unseq, m_ObjectIter.begin(), m_ObjectIter.end(),
+			[this](unsigned int meshIndex)
+			{
+				Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
+				TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
+
+				std::vector<unsigned int> m_TriIter;
+				m_TriIter.resize(mesh->m_Triangles.size());
+				for (unsigned int i = 0; i < mesh->m_Triangles.size(); ++i)
+					m_TriIter[i] = i;
+
+				std::for_each(std::execution::par_unseq, m_TriIter.begin(), m_TriIter.end(),
+					[this, mesh, transform](unsigned int triIndex)
+					{
+						RasterizeTri(mesh->m_Triangles[triIndex], transform);
+					});
+			});
+	}
+	// Single-threaded
+	else
+	{
+		for (unsigned int meshIndex = 0; meshIndex < m_ObjectsToRender.size(); ++meshIndex)
 		{
 			Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
 			TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
 
-			std::vector<unsigned int> m_TriIter;
-			m_TriIter.resize(mesh->m_Triangles.size());
-			for (unsigned int i = 0; i < mesh->m_Triangles.size(); ++i)
-				m_TriIter[i] = i;
-
-			std::for_each(std::execution::par, m_TriIter.begin(), m_TriIter.end(),
-				[this, mesh, transform](unsigned int triIndex)
-				{
-					RasterizeTri(mesh->m_Triangles[triIndex], transform);
-				});
-		});
-#else
-	for (unsigned int meshIndex = 0; meshIndex < m_ObjectsToRender.size(); ++meshIndex)
-	{
-		Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
-		TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
-
-		for (unsigned int triIndex = 0; triIndex < mesh->m_Triangles.size(); ++triIndex)
-		{
-			RasterizeTri(mesh->m_Triangles[triIndex], transform);
+			for (unsigned int triIndex = 0; triIndex < mesh->m_Triangles.size(); ++triIndex)
+			{
+				RasterizeTri(mesh->m_Triangles[triIndex], transform);
+			}
 		}
 	}
-#endif
-
-	m_RenderTex.SetData(m_ImageData);
 }
 
 // TODO: Implement better lighting
 void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _transform)
 {
+	wchar_t* currentImageData = GetCurrentScreenBuffer();
+
+	const glm::vec3 LightDir(normalize(glm::vec3{-.25f, -.25f, 1.0f}));
 	const glm::vec3 LightPos(0.0f, 0.0f, -100.0f);
 	const wchar_t* CharacterMap = L".:-=+*8#%@";
 	// Skew the image to offset the characters being higher than they are wide
 	const glm::mat4 ViewProjection(
-		1.8f, 0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
+
+	const glm::mat4 CameraMatrix = Camera::GetCameraMatrix();
+
 	glm::vec3 LookDirection(0.0f, 0.0f, 1.0f);
 
 	// Apply transformation matrix to current tri
-	Tri t = _tri * _transform->GetTransformation() * ViewProjection;
+	Tri t = _tri *  ViewProjection * CameraMatrix * _transform->GetTransformation();
 	glm::vec3 normal = t.GetSurfaceNormal();
 
 	// Backface culling
@@ -298,16 +417,17 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 		return;
 
 	// Calculate lighting
-	float avgDist = ((t.v1 + t.v2 + t.v3) / 3.0f).length();
-	glm::vec3 bounceDir = glm::normalize(((-2.0f * glm::dot(normal, LookDirection)) * normal) + LookDirection);
-	glm::vec3 hitLocation = (LookDirection * avgDist);
-	glm::vec3 dirToLight = glm::normalize(LightPos - hitLocation);
-	
-	float lightAngle = glm::dot(dirToLight, bounceDir);
-	lightAngle *= 10.0f;
-	int index = (int)(lightAngle * lightAngle * 0.1f);
-	if (index < 0) index = 0;
-	if (index > 10) index = 10;
+	int index = 0;
+	float nDotL = glm::dot(LightDir, normal);
+	if (nDotL < 0.0f)
+	{
+		index = static_cast<int>(-nDotL * 9.f) + 1;
+	}
+	else
+	{
+		//only ambient lighting
+		index = 1;
+	}
 
 	glm::vec4 pos1 = t.v1;
 	glm::vec4 pos2 = t.v2;
@@ -364,6 +484,7 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 		++longIndex;
 	int longMiddleIndex = longIndex;
 
+	// Rasterize top half of triangle
 	if (topSmallSide[0].y != topSmallSide[topSmallSide.size() - 1].y) // If these points are equal dont draw this half of the triangle
 	{
 		for (int smallIndex = 0; smallIndex < topSmallSide.size() && longIndex > 0;)
@@ -382,16 +503,16 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 				int drawX = start.x + (x * direction);
 				int drawY = end.y;
 
-				if (drawX < 0 || drawX > m_Width - 1 || drawY < 0 || drawY > m_Height - 1)
+				if (drawX < 0 || drawX > Width - 1 || drawY < 0 || drawY > Height - 1)
 					continue;
 
-				int drawIndex = drawX + (drawY * m_Width);
+				int drawIndex = drawX + (drawY * Width);
 				
 				float depth = startDepth - (step * x);
-				if (m_DepthData[drawIndex] > depth)
+				if (DepthData[drawIndex] > depth)
 				{
-					m_ImageData[drawIndex] = CharacterMap[index];
-					m_DepthData[drawIndex] = depth;
+					currentImageData[drawIndex] = CharacterMap[index];
+					DepthData[drawIndex] = depth;
 				}
 			}
 	
@@ -403,6 +524,7 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 		}
 	}
 
+	// Rasterize bottom half of triangle
 	longIndex = longMiddleIndex + 1;
 	if (bottomSmallSide[0].y != bottomSmallSide[bottomSmallSide.size() - 1].y)
 	{
@@ -422,16 +544,16 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 				int drawX = start.x + (x * direction);
 				int drawY = end.y;
 
-				if (drawX < 0 || drawX > m_Width - 1 || drawY < 0 || drawY > m_Height - 1)
+				if (drawX < 0 || drawX > Width - 1 || drawY < 0 || drawY > Height - 1)
 					continue;
 
-				int drawIndex = drawX + (drawY * m_Width);
+				int drawIndex = drawX + (drawY * Width);
 
 				float depth = startDepth - (step * x);
-				if (m_DepthData[drawIndex] > depth)
+				if (DepthData[drawIndex] > depth)
 				{
-					m_ImageData[drawIndex] = CharacterMap[index];
-					m_DepthData[drawIndex] = depth;
+					currentImageData[drawIndex] = CharacterMap[index];
+					DepthData[drawIndex] = depth;
 				}
 			}
 	
@@ -489,15 +611,4 @@ void ConsoleRenderer::OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low)
 			std::swap(_high, _low);
 		}
 	}
-}
-#pragma endregion
-
-void ConsoleRenderer::WriteToScreen(int _row, int _col, wchar_t _char)
-{
-	m_ScreenBuffer[_row * m_RenderTex.GetWidth() + _col] = _char;
-}
-
-void ConsoleRenderer::WriteToScreen(int _row, int _col, const std::wstring& _s)
-{
-	swprintf(&m_ScreenBuffer[_row * m_RenderTex.GetWidth() + _col], _s.size() + 1, L"%s", _s.c_str());
 }

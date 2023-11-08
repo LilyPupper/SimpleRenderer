@@ -5,6 +5,7 @@
 #include <vector>
 
 class Renderer;
+class ObjectFactory;
 
 class Application
 {
@@ -15,7 +16,9 @@ public:
 	void Run();
 
 private:
-	std::vector<Object*> m_Objects;
+	std::vector<Object*> m_ObjectList;
 	Renderer* m_Renderer;
+	ObjectFactory* m_ObjectFactory;
+
 	bool m_Running = true;
 };

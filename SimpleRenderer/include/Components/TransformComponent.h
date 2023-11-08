@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "Component.h"
 
 #include <glm.hpp>

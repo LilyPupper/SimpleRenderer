@@ -10,11 +10,20 @@ enum COMPONENT_TYPE;
 
 typedef std::map<const unsigned int, Object*> OBJECT_MAP;
 
+enum ObjectType
+{
+	Default,
+	MovableCamera,
+	RotatingMonkey
+};
+
 class Object
 {
 public:
 	Object();
 	~Object();
+
+	inline static ObjectType GetObjectType() { return ObjectType::Default; }
 
 	virtual void Update(const float& _deltaTime);
 	virtual void Render();

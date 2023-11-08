@@ -1,7 +1,7 @@
 #include "Components/TransformComponent.h"
 
 TransformComponent::TransformComponent(Object* _owner)
-	: Component(_owner), m_Translation(glm::vec3()), m_Rotation(glm::identity<glm::quat>()), m_Scale(glm::vec3()), m_TransformationMatrix(glm::identity<glm::mat4>()), m_RebuildMatrix(true)
+	: Component(_owner), m_Translation(glm::vec3()), m_Rotation(glm::identity<glm::quat>()), m_Scale(glm::vec3(1.f, 1.f, 1.f)), m_TransformationMatrix(glm::identity<glm::mat4>()), m_RebuildMatrix(true)
 {
 	m_Type = TRANSFORM;
 }
@@ -109,6 +109,7 @@ void TransformComponent::RebuildTransformation()
 		0.0f, 0.0f, 1.0f, m_Translation.z,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
+	//m_TranslationMatrix = glm::translate(m_TranslationMatrix, m_Translation);
 
 	m_TransformationMatrix = m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix;
 
