@@ -30,15 +30,39 @@ void Camera::Update(const float& _deltaTime)
 		return;
 	}
 
-	const float speed = 1000.0f;
-	if (GetKeyState('A') & 0x8000)
+	//glm::vec3 forward = t->Get
+
+	const float speed = 200.5f * _deltaTime;
+	if (GetKeyState('W') & 0x8000)
 	{
-		t->Translate(-_deltaTime * speed, 0.0f, 0.0f);
+		glm::vec3 move = t->GetForward() * speed;
+		t->Translate(move);
+	}
+	if (GetKeyState('S') & 0x8000)
+	{
+		glm::vec3 move = -t->GetForward() * speed;
+		t->Translate(move);
 	}
 	if (GetKeyState('D') & 0x8000)
 	{
-		t->Translate(_deltaTime * speed, 0.0f, 0.0f);
+		glm::vec3 move = t->GetRight() * speed;
+		t->Translate(move);
 	}
+	if (GetKeyState('A') & 0x8000)
+	{
+		glm::vec3 move = -t->GetRight() * speed;
+		t->Translate(move);
+	}
+	if (GetKeyState(' ') & 0x8000)
+	{
+		glm::vec3 move = t->GetUp() * speed;
+		t->Translate(move);
+	}
+	//if (GetKeyState('') & 0x8000)
+	//{
+	//	glm::vec3 move = -t->GetUp() * speed;
+	//	t->Translate(move);
+	//}
 }
 
 void Camera::Render()

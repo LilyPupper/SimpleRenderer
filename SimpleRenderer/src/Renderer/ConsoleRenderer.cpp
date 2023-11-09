@@ -182,10 +182,12 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 		case Rasterize:
 		{
 			RenderRasterize();
+			break;
 		}
 		case Raytrace:
 		{
 			RenderRaycast();
+			break;
 		}
 	}
 
@@ -379,7 +381,7 @@ void ConsoleRenderer::RenderRasterize()
 		{
 			Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
 			TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
-
+		
 			for (unsigned int triIndex = 0; triIndex < mesh->m_Triangles.size(); ++triIndex)
 			{
 				RasterizeTri(mesh->m_Triangles[triIndex], transform);
@@ -397,28 +399,30 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	const glm::vec3 LightPos(0.0f, 0.0f, -100.0f);
 	const wchar_t* CharacterMap = L".:-=+*8#%@";
 	// Skew the image to offset the characters being higher than they are wide
-	const glm::mat4 ViewProjection(
-		1.0f, 0.0f, 0.0f, 0.0f,
+	const glm::mat4 asciiScaleOffset(
+		2.5f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	const glm::mat4 CameraMatrix = Camera::GetCameraMatrix();
+	TransformComponent* cameraT = Camera::Main->GetTransform();
+	glm::mat4 CameraMatrix = Camera::GetCameraMatrix();
+	CameraMatrix = glm::inverse(Camera::GetCameraMatrix());
 
 	glm::vec3 LookDirection(0.0f, 0.0f, 1.0f);
 
 	// Apply transformation matrix to current tri
-	Tri t = _tri *  ViewProjection * CameraMatrix * _transform->GetTransformation();
-	glm::vec3 normal = t.GetSurfaceNormal();
+	glm::vec3 normal = _tri.GetSurfaceNormal();
 
 	// Backface culling
-	if (glm::dot(LookDirection, normal) > 0.0f)
+	glm::vec4 worldSpaceNormal = _transform->GetTransform()->GetTransformation() * glm::vec4(normal, 1.0f);
+	if (glm::dot(LookDirection, glm::vec3{worldSpaceNormal}) > 0.0f)
 		return;
 
 	// Calculate lighting
 	int index = 0;
-	float nDotL = glm::dot(LightDir, normal);
+	float nDotL = glm::dot(LightDir, glm::vec3(worldSpaceNormal));
 	if (nDotL < 0.0f)
 	{
 		index = static_cast<int>(-nDotL * 9.f) + 1;
@@ -429,9 +433,37 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 		index = 1;
 	}
 
-	glm::vec4 pos1 = t.v1;
-	glm::vec4 pos2 = t.v2;
-	glm::vec4 pos3 = t.v3;
+	glm::vec4 p1(_tri.v1);
+	glm::vec4 p2(_tri.v2);
+	glm::vec4 p3(_tri.v3);
+	p1.w = 1.f;
+	p2.w = 1.f;
+	p3.w = 1.f;
+
+	glm::mat4 modelView = CameraMatrix * _transform->GetTransformation();
+	glm::mat4 projection = glm::perspective(135.0f, (float)Width/(float)Height, 0.0f, 1000.f);
+	glm::vec4 viewport(0.0f, 0.0f, Width, Height);
+	glm::mat4 mvp = projection * modelView;
+
+	glm::vec4 pos1 = mvp * p1;
+	glm::vec4 pos2 = mvp * p2;
+	glm::vec4 pos3 = mvp * p3;
+
+	pos1.x = (pos1.x + 1.0f) * (float)Width/2;
+	pos2.x = (pos2.x + 1.0f) * (float)Width/2;
+	pos3.x = (pos3.x + 1.0f) * (float)Width/2;
+
+	pos1.y = (pos1.y + 1.0f) * (float)Height/2;
+	pos2.y = (pos2.y + 1.0f) * (float)Height/2;
+	pos3.y = (pos3.y + 1.0f) * (float)Height/2;
+
+	//glm::vec3 pos1 = glm::project(p1, modelView, projection, viewport);
+	//glm::vec3 pos2 = glm::project(p2, modelView, projection, viewport);
+	//glm::vec3 pos3 = glm::project(p3, modelView, projection, viewport);
+
+	//pos1 = _tri.v1;
+	//pos2 = _tri.v2;
+	//pos3 = _tri.v3;
 
 	// Calculate lines and triangle direction
 	OrderPointsByYThenX(pos2, pos1);
@@ -446,34 +478,34 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 
 	// Estimate depth for each line
 	// topSmallSide
-	float startDepth = pos2.z;
-	float endDepth = pos1.z;
-	float difference = startDepth - endDepth;
-	float step = difference / topSmallSide.size();
-	for (unsigned int i = 0; i < topSmallSide.size(); ++i)
-	{
-		topSmallSide[i].z = startDepth - (step * (float)i);
-	}
-
-	// bottomSmallSide
-	//startDepth = pos2.z;
-	endDepth = pos3.z;
-	difference = startDepth - endDepth;
-	step = difference / bottomSmallSide.size();
-	for (unsigned int i = 0; i < bottomSmallSide.size(); ++i)
-	{
-		bottomSmallSide[i].z = startDepth - (step * (float)i);
-	}
-
-	// longSide
-	startDepth = pos1.z;
-	//endDepth = pos3.z;
-	difference = startDepth - endDepth;
-	step = difference / longSide.size();
-	for (unsigned int i = 0; i < longSide.size(); ++i)
-	{
-		longSide[i].z = startDepth - (step * (float)i);
-	}
+	//float startDepth = t.v2.z;
+	//float endDepth = t.v1.z;
+	//float difference = startDepth - endDepth;
+	//float step = difference / topSmallSide.size();
+	//for (unsigned int i = 0; i < topSmallSide.size(); ++i)
+	//{
+	//	topSmallSide[i].z = startDepth - (step * (float)i);
+	//}
+	//
+	//// bottomSmallSide
+	////startDepth = t.v2.z;
+	//endDepth = t.v3.z;
+	//difference = startDepth - endDepth;
+	//step = difference / bottomSmallSide.size();
+	//for (unsigned int i = 0; i < bottomSmallSide.size(); ++i)
+	//{
+	//	bottomSmallSide[i].z = startDepth - (step * (float)i);
+	//}
+	//
+	//// longSide
+	//startDepth = t.v1.z;
+	////endDepth = t.v3.z;
+	//difference = startDepth - endDepth;
+	//step = difference / longSide.size();
+	//for (unsigned int i = 0; i < longSide.size(); ++i)
+	//{
+	//	longSide[i].z = startDepth - (step * (float)i);
+	//}
 
 	// Render the triangle
 	int longIndex = 0;

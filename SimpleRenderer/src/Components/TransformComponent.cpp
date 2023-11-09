@@ -41,32 +41,37 @@ void TransformComponent::Scale(const float& _x, const float& _y, const float& _z
 
 void TransformComponent::SetRotation(const glm::vec3& _eulerAngles)
 {
-	m_Rotation = glm::rotate(glm::identity<glm::quat>(), _eulerAngles);
+	m_Rotation = glm::rotate(glm::identity<glm::quat>(), glm::radians(_eulerAngles));
 	m_RebuildMatrix = true;
 }
 
 void TransformComponent::Rotate(const float& _theta, const glm::vec3& _axis)
 {
-	m_Rotation = glm::rotate(m_Rotation, _theta, glm::normalize(_axis));
+	m_Rotation = glm::rotate(m_Rotation, glm::radians(_theta), glm::normalize(_axis));
 	m_RebuildMatrix = true;
 }
 
 void TransformComponent::RotateX(const float& _theta)
 {
-	m_Rotation = glm::rotate(m_Rotation, _theta, glm::vec3(1.0f, 0.0f, 0.0f));
+	m_Rotation = glm::rotate(m_Rotation, glm::radians(_theta), glm::vec3(1.0f, 0.0f, 0.0f));
 	m_RebuildMatrix = true;
 }
 
 void TransformComponent::RotateY(const float& _theta)
 {
-	m_Rotation = glm::rotate(m_Rotation, _theta, glm::vec3(0.0f, 1.0f, 0.0f));
+	m_Rotation = glm::rotate(m_Rotation, glm::radians(_theta), glm::vec3(0.0f, 1.0f, 0.0f));
 	m_RebuildMatrix = true;
 }
 
 void TransformComponent::RotateZ(const float& _theta)
 {
-	m_Rotation = glm::rotate(m_Rotation, _theta, glm::vec3(0.0f, 0.0f, 1.0f));
+	m_Rotation = glm::rotate(m_Rotation, glm::radians(_theta), glm::vec3(0.0f, 0.0f, 1.0f));
 	m_RebuildMatrix = true;
+}
+
+void TransformComponent::SetPosition(const glm::vec3& _pos)
+{
+	SetPosition(_pos.x, _pos.y, _pos.z);
 }
 
 void TransformComponent::SetPosition(const float& _x, const float& _y, const float& _z)
@@ -78,6 +83,11 @@ void TransformComponent::SetPosition(const float& _x, const float& _y, const flo
 	m_RebuildMatrix = true;
 }
 
+void TransformComponent::Translate(const glm::vec3& _translation)
+{
+	Translate(_translation.x, _translation.y, _translation.z);
+}
+
 void TransformComponent::Translate(const float& _x, const float& _y, const float& _z)
 {
 	m_Translation.x += _x;
@@ -87,9 +97,42 @@ void TransformComponent::Translate(const float& _x, const float& _y, const float
 	m_RebuildMatrix = true;
 }
 
-glm::vec3 TransformComponent::GetEuler() const
+glm::vec3 TransformComponent::GetForward()
 {
-	return glm::eulerAngles(m_Rotation);
+	return glm::vec3{0.0, 0.0, 1.0};
+	if (m_RebuildMatrix)
+		RebuildTransformation();
+
+	const glm::mat4 inverted = glm::inverse(m_TransformationMatrix);
+	const glm::vec3 forward = glm::normalize(glm::vec3(inverted[2]));
+	return forward;
+}
+
+glm::vec3 TransformComponent::GetUp()
+{
+	return glm::vec3{0.0, 1.0, 0.0};
+	if (m_RebuildMatrix)
+		RebuildTransformation();
+
+	const glm::mat4 inverted = glm::inverse(m_TransformationMatrix);
+	const glm::vec3 up = glm::normalize(glm::vec3(inverted[0]));
+	return up;
+}
+
+glm::vec3 TransformComponent::GetRight()
+{
+	return glm::vec3{1.0, 0.0, 0.0};
+	if (m_RebuildMatrix)
+		RebuildTransformation();
+
+	const glm::mat4 inverted = glm::inverse(m_TransformationMatrix);
+	const glm::vec3 right = glm::normalize(glm::vec3(inverted[1]));
+	return right;
+}
+
+glm::vec3 TransformComponent::GetEuler(bool _degrees/*= true*/) const
+{
+	return glm::degrees(glm::eulerAngles(m_Rotation));
 }
 
 void TransformComponent::RebuildTransformation()

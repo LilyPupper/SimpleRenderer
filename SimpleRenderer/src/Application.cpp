@@ -18,15 +18,15 @@ Application::Application(const int& _width, const int& _height)
 	Camera* cam = m_ObjectFactory->NewObject<Camera>();
 	if (TransformComponent* tc = cam->GetTransform())
 	{
-		tc->SetPosition(0.f, 0.f, 0.f);
+		tc->SetPosition(0.f, 0.f, -100.f);
 	}
 
 	RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
 	if (TransformComponent* t1 = rm1->GetTransform())
 	{
-		t1->SetScale(15.f);
-		t1->SetPosition(30.f, 20.0f, 10.0f);
-		t1->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+		t1->SetScale(10.f);
+		t1->SetPosition(0.f, 0.0f, 0.0f);
+		t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
 	}
 }
 
