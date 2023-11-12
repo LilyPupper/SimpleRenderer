@@ -95,4 +95,8 @@ protected:
 	std::atomic_bool bIsScreenBufferReady;
 	std::atomic_bool bRenderThreadContinue; 
 
+private:
+	glm::mat4 GetMVP(TransformComponent* _transform) const;
+	Tri TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform) const;
+	Tri TriangleToWorldSpace(const Tri& _tri, TransformComponent* _transform) const;
 };

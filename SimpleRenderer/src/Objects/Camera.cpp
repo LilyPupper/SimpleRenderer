@@ -29,10 +29,8 @@ void Camera::Update(const float& _deltaTime)
 	{
 		return;
 	}
-
-	//glm::vec3 forward = t->Get
-
-	const float speed = 200.5f * _deltaTime;
+ 
+	const float speed = 200.f * _deltaTime;
 	if (GetKeyState('W') & 0x8000)
 	{
 		glm::vec3 move = t->GetForward() * speed;
@@ -53,16 +51,6 @@ void Camera::Update(const float& _deltaTime)
 		glm::vec3 move = -t->GetRight() * speed;
 		t->Translate(move);
 	}
-	if (GetKeyState(' ') & 0x8000)
-	{
-		glm::vec3 move = t->GetUp() * speed;
-		t->Translate(move);
-	}
-	//if (GetKeyState('') & 0x8000)
-	//{
-	//	glm::vec3 move = -t->GetUp() * speed;
-	//	t->Translate(move);
-	//}
 }
 
 void Camera::Render()

@@ -6,5 +6,5 @@ class Tri;
 
 namespace Physics
 {
-    bool IntersectRayTriangle(glm::vec3 _origin, glm::vec3 _dir, Tri _tri, float& _baryX, float& _baryY, float& distance);
+    bool IntersectRayTriangle(const glm::vec3& _origin, const glm::vec3& _dir, const Tri& _tri, float& _baryX, float& _baryY, float& distance);
 }
