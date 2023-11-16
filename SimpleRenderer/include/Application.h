@@ -4,7 +4,7 @@
 
 #include <vector>
 
-class Renderer;
+class RendererBase;
 class ObjectFactory;
 
 class Application
@@ -17,7 +17,7 @@ public:
 
 private:
 	std::vector<Object*> m_ObjectList;
-	Renderer* m_Renderer;
+	RendererBase* m_Renderer;
 	ObjectFactory* m_ObjectFactory;
 
 	bool m_Running = true;

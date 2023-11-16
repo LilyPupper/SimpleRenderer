@@ -15,13 +15,18 @@
 
 #include "Objects/Camera.h"
 
-ConsoleRenderer::ConsoleRenderer(const unsigned int& _width, const unsigned int& _height)
-	: Width(_width)
-	, Height(_height)
+// Undefining these macros allows the use of std::numeric_limits<>::max() and std::min without errors
+#undef max
+#undef min
+
+ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _height)
+	: RendererBase(_width, _height)
 	, ConsoleBuffer(nullptr)
 	, Console(INVALID_HANDLE_VALUE)
 	, ThreadPool(std::thread::hardware_concurrency())
 {
+	ShowConsole();
+
 	CurrentScreenBufferIndex = 0;
 	PreviousScreenBufferIndex = 0;
 
@@ -68,7 +73,7 @@ ConsoleRenderer::~ConsoleRenderer()
 {
 	bRenderThreadContinue = false;
 
-	for (std::map<const char*, Mesh*>::iterator itr = m_RegisteredModels.begin(); itr != m_RegisteredModels.end(); itr++)
+	for (std::map<const char*, Mesh*>::iterator itr = RegisteredModels.begin(); itr != RegisteredModels.end(); itr++)
 	{
 		delete itr->second;
 	}
@@ -151,11 +156,6 @@ bool ConsoleRenderer::Initialise()
 	return true;
 }
 
-void ConsoleRenderer::DrawMesh(const char* _modelReference, TransformComponent* const _transform)
-{
-	m_ObjectsToRender.push_back(std::make_pair(_modelReference, _transform));
-}
-
 void ConsoleRenderer::Render(const float& _deltaTime)
 { 
 	switch(RenderMode)
@@ -172,7 +172,7 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 		}
 	}
 
-	m_ObjectsToRender.clear();
+	ObjectsToRender.clear();
 
 	if(!bIsScreenBufferReady)
 	{
@@ -263,10 +263,10 @@ wchar_t ConsoleRenderer::RaycastPixel(unsigned int _column, unsigned int _row)
 	wchar_t result = L' ';
 
 	// For every mesh
-	for (unsigned int meshIndex = 0; meshIndex < m_ObjectsToRender.size(); ++meshIndex)
+	for (unsigned int meshIndex = 0; meshIndex < ObjectsToRender.size(); ++meshIndex)
 	{
-		Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
-		TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
+		Mesh* mesh = RegisteredModels[ObjectsToRender[meshIndex].first];
+		TransformComponent* transform = ObjectsToRender[meshIndex].second;
 
 		float lastDistance = std::numeric_limits<float>::infinity();
 
@@ -330,15 +330,15 @@ void ConsoleRenderer::RenderRasterize()
 	if (bMultithreaded)
 	{
 		std::vector<unsigned int> m_ObjectIter;
-		m_ObjectIter.resize(m_ObjectsToRender.size());
-		for (unsigned int i = 0; i < m_ObjectsToRender.size(); ++i)
+		m_ObjectIter.resize(ObjectsToRender.size());
+		for (unsigned int i = 0; i < ObjectsToRender.size(); ++i)
 			m_ObjectIter[i] = i;
 
 		std::for_each(std::execution::par, m_ObjectIter.begin(), m_ObjectIter.end(),
 			[this](unsigned int meshIndex)
 			{
-				Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
-				TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
+				Mesh* mesh = RegisteredModels[ObjectsToRender[meshIndex].first];
+				TransformComponent* transform = ObjectsToRender[meshIndex].second;
 
 				std::vector<unsigned int> m_TriIter;
 				m_TriIter.resize(mesh->m_Triangles.size());
@@ -355,10 +355,10 @@ void ConsoleRenderer::RenderRasterize()
 	// Single-threaded
 	else
 	{
-		for (unsigned int meshIndex = 0; meshIndex < m_ObjectsToRender.size(); ++meshIndex)
+		for (unsigned int meshIndex = 0; meshIndex < ObjectsToRender.size(); ++meshIndex)
 		{
-			Mesh* mesh = m_RegisteredModels[m_ObjectsToRender[meshIndex].first];
-			TransformComponent* transform = m_ObjectsToRender[meshIndex].second;
+			Mesh* mesh = RegisteredModels[ObjectsToRender[meshIndex].first];
+			TransformComponent* transform = ObjectsToRender[meshIndex].second;
 		
 			for (unsigned int triIndex = 0; triIndex < mesh->m_Triangles.size(); ++triIndex)
 			{

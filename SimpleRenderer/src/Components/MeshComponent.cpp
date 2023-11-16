@@ -1,8 +1,8 @@
 #include "Components/MeshComponent.h"
 
-#include "Renderer/Renderer.h"
+#include "Renderer/RendererBase.h"
 
-MeshComponent::MeshComponent(Object* _owner, Renderer* _renderer, const char* meshID)
+MeshComponent::MeshComponent(Object* _owner, RendererBase* _renderer, const char* meshID)
 	: Component(_owner)
 	, bVisible(true)
 	, _Renderer(_renderer)

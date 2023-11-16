@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Renderer.h"
+#include "Renderer/RendererBase.h"
 #include "CharTexture.h"
 
 #include "glm/glm.hpp"
@@ -17,16 +17,17 @@
 
 class Tri;
 
-class ConsoleRenderer : public Renderer
+class ConsoleRenderer : public RendererBase
 {
 public:
-	ConsoleRenderer(const unsigned int& _width, const unsigned int& _height);
+	ConsoleRenderer(const unsigned int _width, const unsigned int _height);
 	virtual ~ConsoleRenderer() override;
 
-	virtual bool Initialise() override;
-	virtual void DrawMesh(const char* _modelReference, TransformComponent* const _transform) override;
+	bool Initialise();
+
 	virtual void Render(const float& _deltaTime) override;
-	virtual void PushToScreen(const float& _deltaTime) override;
+
+	void PushToScreen(const float& _deltaTime);
 
 	// RAYCAST MODE
 	void RenderRaycast();
@@ -70,8 +71,6 @@ public:
 
 protected:
 
-	std::vector<std::pair<const char*, TransformComponent* const>> m_ObjectsToRender;
-
 	int CurrentScreenBufferIndex;
 	int PreviousScreenBufferIndex;
 	std::mutex DoubleBufferMtx;
@@ -80,10 +79,6 @@ protected:
 
 	float* DepthData;
 	std::vector<unsigned int> ImageHorizontalIter, m_ImageVerticalIter;
-
-	// Render parameters
-
-	const int Width, Height;
 
 	wchar_t* ConsoleBuffer;
 	HANDLE Console;

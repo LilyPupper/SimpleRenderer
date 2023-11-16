@@ -1,6 +1,6 @@
 #include "Factories/ObjectFactory.h"
 
-#include "Renderer/Renderer.h"
+#include "Renderer/RendererBase.h"
 
 #include "Objects/Object.h"
 #include "Objects/Camera.h"
@@ -8,7 +8,7 @@
 
 #include "Components/MeshComponent.h"
 
-ObjectFactory::ObjectFactory(Renderer* _renderer, std::vector<Object*>& _objectList)
+ObjectFactory::ObjectFactory(RendererBase* _renderer, std::vector<Object*>& _objectList)
 	: _Renderer(_renderer)
 	, ObjectList(_objectList)
 {}

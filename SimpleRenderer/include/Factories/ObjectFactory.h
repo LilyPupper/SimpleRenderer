@@ -3,12 +3,12 @@
 #include "FactoryBase.h"
 #include "Objects/Object.h"
 
-class Renderer;
+class RendererBase;
 
 class ObjectFactory : public FactoryBase
 {
 public:
-	ObjectFactory(Renderer* _renderer, std::vector<Object*>& _objectList);
+	ObjectFactory(RendererBase* _renderer, std::vector<Object*>& _objectList);
 	virtual ~ObjectFactory() override {}
 
 	template<typename T>
@@ -21,6 +21,6 @@ public:
 private:
 	Object* NewObject(ObjectType type);
 
-	Renderer* _Renderer;
+	RendererBase* _Renderer;
 	std::vector<Object*>& ObjectList;
 };

@@ -2,7 +2,7 @@
 
 #include "Components/TransformComponent.h"
 #include "Components/MeshComponent.h"
-#include "Renderer/Renderer.h"
+#include "Renderer/RendererBase.h"
 
 RotatingModel::RotatingModel()
 	: m_Time(0.0f)

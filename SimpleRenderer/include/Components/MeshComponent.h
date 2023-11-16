@@ -2,12 +2,12 @@
 
 #include "Component.h"
 
-class Renderer;
+class RendererBase;
 
 class MeshComponent : public Component
 {
 public:
-	MeshComponent(Object* _owner, Renderer* _renderer, const char* meshID);
+	MeshComponent(Object* _owner, RendererBase* _renderer, const char* meshID);
 	~MeshComponent();
 
 	virtual void Update(const float& _deltaTime);
@@ -19,5 +19,5 @@ private:
 	bool bVisible;
 	const char* MeshID;
 
-	Renderer* _Renderer;
+	RendererBase* _Renderer;
 };
