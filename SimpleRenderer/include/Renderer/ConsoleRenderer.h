@@ -3,7 +3,7 @@
 #include "Renderer/Renderer.h"
 #include "CharTexture.h"
 
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #define NOMINMAX // Get rid of standard min and max macros in Windows.h
 #include <atomic>
 #include <future>
@@ -24,7 +24,6 @@ public:
 	virtual ~ConsoleRenderer() override;
 
 	virtual bool Initialise() override;
-	virtual const char* RegisterMesh(const char* _meshPath) override;
 	virtual void DrawMesh(const char* _modelReference, TransformComponent* const _transform) override;
 	virtual void Render(const float& _deltaTime) override;
 	virtual void PushToScreen(const float& _deltaTime) override;
@@ -41,11 +40,11 @@ public:
 
 	inline void WriteToScreen(int _row, int _col, wchar_t _char)
 	{
-		ConsoleBuffer[_row * Width + _col] = _char;
+		GetCurrentScreenBuffer()[_row * Width + _col] = _char;
 	}
 	inline void WriteToScreen(int _row, int _col, const std::wstring& _s)
 	{
-		swprintf(&ConsoleBuffer[_row * Width + _col], _s.size() + 1, L"%s", _s.c_str());
+		swprintf(&GetCurrentScreenBuffer()[_row * Width + _col], _s.size() + 1, L"%s", _s.c_str());
 	}
 
 	void NextScreenBuffer()
@@ -93,7 +92,7 @@ protected:
 	rdx::thread_pool ThreadPool;
 
 	std::atomic_bool bIsScreenBufferReady;
-	std::atomic_bool bRenderThreadContinue; 
+	std::atomic_bool bRenderThreadContinue;
 
 private:
 	glm::mat4 GetMVP(TransformComponent* _transform) const;

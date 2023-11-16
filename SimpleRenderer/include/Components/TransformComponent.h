@@ -4,8 +4,8 @@
 
 #include "Component.h"
 
-#include <glm.hpp>
-#include <gtx/quaternion.hpp>
+#include "glm/glm.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 class TransformComponent : public Component
 {

@@ -2,7 +2,7 @@
 
 class Tri;
 
-#include <glm.hpp>
+#include "glm/glm.hpp"
 
 namespace Physics
 {

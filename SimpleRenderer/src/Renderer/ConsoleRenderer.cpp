@@ -3,12 +3,10 @@
 #include "Tri.h"
 #include "Mesh.h"
 #include "Physics.h"
-#include "FileLoader.h"
 
 #include "Components/TransformComponent.h"
 
 #include <iostream>
-#include <time.h>
 #include <stdio.h>
 #include <conio.h>
 #include <limits>
@@ -153,21 +151,6 @@ bool ConsoleRenderer::Initialise()
 	return true;
 }
 
-const char* ConsoleRenderer::RegisterMesh(const char* _meshPath)
-{
-	Mesh* mesh = m_RegisteredModels[_meshPath];
-	if (mesh == nullptr)
-	{
-		mesh = FileLoader::LoadMesh(_meshPath);
-
-		if (mesh == nullptr) return NULL;
-
-		m_RegisteredModels[_meshPath] = mesh;
-	}
-
-	return _meshPath;
-}
-
 void ConsoleRenderer::DrawMesh(const char* _modelReference, TransformComponent* const _transform)
 {
 	m_ObjectsToRender.push_back(std::make_pair(_modelReference, _transform));
@@ -201,7 +184,7 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 void ConsoleRenderer::PushToScreen(const float& _deltaTime)
 {
 	DWORD dwBytesWritten;
-	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
+	WriteConsoleOutputCharacter(Console, (LPCSTR)GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
 }
 
 // https://youtu.be/1KTgc2SEt50
@@ -639,6 +622,10 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	glm::vec4 pos1 = MVP * p1;
 	glm::vec4 pos2 = MVP * p2;
 	glm::vec4 pos3 = MVP * p3;
+
+	pos1 /= pos1.w;
+	pos2 /= pos2.w;
+	pos3 /= pos3.w;
 
 	pos1.x = (pos1.x + 1.0f) * (float)Width / 2;
 	pos2.x = (pos2.x + 1.0f) * (float)Width / 2;

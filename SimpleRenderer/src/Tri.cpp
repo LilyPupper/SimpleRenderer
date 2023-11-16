@@ -1,7 +1,7 @@
 #include "Tri.h"
 
 #include <math.h>
-#include <glm.hpp>
+#include "glm/glm.hpp"
 
 Tri::Tri(const glm::vec3& _v1, const glm::vec3& _v2, const glm::vec3& _v3)
 	: v1(glm::vec4(_v1, 1.0f)), v2(glm::vec4(_v2, 1.0f)), v3(glm::vec4(_v3, 1.0f)), m_SurfaceNormal(glm::vec4())

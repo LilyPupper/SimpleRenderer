@@ -2,7 +2,7 @@
 
 int main()
 {
-	Application app(768, 600);
+	Application app(512, 256);
 	app.Run();
 
 	return 0;

@@ -4,6 +4,7 @@
 #include "Objects/RotatingModel.h"
 #include "Components/TransformComponent.h"
 #include "Renderer/ConsoleRenderer.h"
+#include "Renderer/SDLRenderer.h"
 #include "Factories/ObjectFactory.h"
 
 #include <chrono>

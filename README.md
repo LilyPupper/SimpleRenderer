@@ -7,7 +7,11 @@
 </div>
 
 ## Getting Started
-Just clone the repo, run 'Generate_VS20XX_Project.bat', build, and run
+- Clone the repo
+- Run 'Generate_VS20XX_Project.bat'
+- Open the project inside the folder called 'CMakeFiles'
+- Set 'SimpleRenderer' as the default project
+- Build and run
 
 ### Prerequisites
 * Windows

@@ -2,7 +2,7 @@
 
 #include "Tri.h"
 
-#include <glm.hpp>
+#include "glm/glm.hpp"
 #include <limits>
 
 namespace Physics

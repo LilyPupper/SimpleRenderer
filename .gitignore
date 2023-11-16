@@ -3,10 +3,13 @@
 Debug/
 TextRendering/Debug/
 bin/
+CMakeFiles/
+vendor/
 
 # Files
 *.user
 *.url
 *.sln
+*.txt
 *.vcxproj
 *.vcxproj.filters
