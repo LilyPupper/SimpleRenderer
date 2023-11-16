@@ -1,7 +1,5 @@
 # Directories
 .vs/
-Debug/
-TextRendering/Debug/
 bin/
 CMakeFiles/
 vendor/
