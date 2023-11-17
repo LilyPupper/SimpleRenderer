@@ -51,7 +51,7 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	bIsScreenBufferReady = false;
 
 	RenderMode = RENDER_MODE::Rasterize;
-	bMultithreaded = false;
+	bMultithreaded = true;
 
 	ThreadPool.enqueue([this]()
 	{

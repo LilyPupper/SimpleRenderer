@@ -2,15 +2,15 @@
 
 #include "gtest/gtest.h"
 #include "Components/TransformComponent.h"
-#include "Components/TransformComponent.cpp"
+//#include "Components/TransformComponent.cpp"
 #include "Objects/Object.h"
-#include "Objects/Object.cpp"
+//#include "Objects/Object.cpp"
 #include "Components/Component.h"
-#include "Components/Component.cpp"
+//#include "Components/Component.cpp"
 
 namespace TransformComponentTests
 {
-	TEST(TransformComponent, BasicAssertions)
+	TEST(TransformComponentTest, SetPosition)
 	{
 		TransformComponent transform(nullptr);
 

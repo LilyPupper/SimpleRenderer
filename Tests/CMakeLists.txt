@@ -3,27 +3,25 @@ project(Tests)
 file(GLOB_RECURSE SOURCES *.cpp *.c)
 file(GLOB_RECURSE INCS *.h)
 add_executable(Tests ${SOURCES} ${INCS})
-#set_property(TARGET Tests PROPERTY
-#             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-source_group(headers FILES ${INCS}) 
+source_group(headers FILES ${INCS})
+
+add_dependencies(Tests SimpleRenderer)
 
 include_directories(${SimpleRenderer_SOURCE_DIR}/SimpleRenderer/include)
 include_directories(${SimpleRenderer_SOURCE_DIR}/SimpleRenderer/src)
 
-set(SDL_INCLUDES "../vendor/sdl/include")
-target_include_directories(Tests SYSTEM PRIVATE ${SDL_INCLUDES})
-
-set(GOOGLETEST_INCLUDES "../vendor/googletest/googletest/include")
-target_include_directories(Tests SYSTEM PRIVATE ${GOOGLETEST_INCLUDES})
+target_include_directories(Tests SYSTEM PRIVATE "../vendor/sdl/include")
+target_include_directories(Tests SYSTEM	PRIVATE "../vendor/googletest/googletest/include")
 
 set_target_properties(Tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${SimpleRenderer_SOURCE_DIR}/bin/Tests)
 
 target_link_libraries(Tests
 	PRIVATE glm
-	gtest
+	PRIVATE gtest_main
 	PRIVATE SDL3::SDL3
+	PRIVATE SimpleRenderer_Interface
 	)
-	
+
 if (WIN32)
     add_custom_command(
         TARGET Tests POST_BUILD

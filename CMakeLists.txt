@@ -13,5 +13,5 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 add_definitions(-DUNICODE -D_UNICODE)
 
 add_subdirectory(vendor)
-add_subdirectory(Tests)
 add_subdirectory(SimpleRenderer)
+add_subdirectory(Tests)
