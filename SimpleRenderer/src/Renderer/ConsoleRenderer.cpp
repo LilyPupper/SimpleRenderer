@@ -51,7 +51,7 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	bIsScreenBufferReady = false;
 
 	RenderMode = RENDER_MODE::Rasterize;
-	bMultithreaded = true;
+	bMultithreaded = false;
 
 	ThreadPool.enqueue([this]()
 	{
@@ -95,7 +95,12 @@ bool ConsoleRenderer::Initialise()
 		fontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
 		if (GetCurrentConsoleFontEx(hStdOut, FALSE, &fontInfo))
 		{
-			if (Width > 240 || Height > 80)
+			// The console window seems to size itself correctly when the width and height are below the following values
+			// so if our width or height is above these limits we need to manually size the window
+			constexpr int MaxWidth = 240;
+			constexpr int MaxHeight = 80;
+
+			if (Width > MaxWidth || Height > MaxHeight)
 			{
 				const float aspectRatio = Width / Height;
 				const int newHeight = aspectRatio * Height;
@@ -184,7 +189,7 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 void ConsoleRenderer::PushToScreen(const float& _deltaTime)
 {
 	DWORD dwBytesWritten;
-	WriteConsoleOutputCharacter(Console, (LPCSTR)GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
+	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
 }
 
 // https://youtu.be/1KTgc2SEt50
@@ -387,21 +392,15 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	glm::vec4 pos2 = transformedTri.v2;
 	glm::vec4 pos3 = transformedTri.v3;
 
-	glm::mat4 asciiStretchReduction = {
-	2.5f, 0.f, 0.f, 0.f,
-	0.f, 1.f, 0.f, 0.f,
-	0.f, 0.f, 1.f, 0.f,
-	0.f, 0.f, 0.f, 1.f
-	};
-
-	transformedTri *= asciiStretchReduction;
+	transformedTri.RecalculateSurfaceNormal();
 
 	// Apply transformation matrix to current tri
 	glm::vec3 normal = transformedTri.GetSurfaceNormal();
+	glm::vec3 camToTri = glm::normalize(((transformedTri.v1 + transformedTri.v2 + transformedTri.v3) / 3.f) - glm::vec4(cameraTransform->GetPosition(), 1.f));
 
 	// Backface culling
-	if (glm::dot(camForward, glm::vec3{normal}) > 0.0f)
-		return;
+	//if (glm::dot(camToTri, glm::vec3{normal}) > 0.0f)
+	//	return;
 
 	// Calculate lighting
 	int index = 0;
@@ -427,37 +426,6 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	std::vector<glm::vec3> topSmallSide = PlotLine(pos2, pos1);
 	std::vector<glm::vec3> bottomSmallSide = PlotLine(pos2, pos3);
 	std::vector<glm::vec3> longSide = PlotLine(pos1, pos3);
-
-	// Estimate depth for each line
-	// topSmallSide
-	float startDepth = transformedTri.v2.z;
-	float endDepth = transformedTri.v1.z;
-	float difference = startDepth - endDepth;
-	float step = difference / topSmallSide.size();
-	for (unsigned int i = 0; i < topSmallSide.size(); ++i)
-	{
-		topSmallSide[i].z = startDepth - (step * (float)i);
-	}
-	
-	// bottomSmallSide
-	//startDepth = t.v2.z;
-	endDepth = transformedTri.v3.z;
-	difference = startDepth - endDepth;
-	step = difference / bottomSmallSide.size();
-	for (unsigned int i = 0; i < bottomSmallSide.size(); ++i)
-	{
-		bottomSmallSide[i].z = startDepth - (step * (float)i);
-	}
-	
-	// longSide
-	startDepth = transformedTri.v1.z;
-	//endDepth = t.v3.z;
-	difference = startDepth - endDepth;
-	step = difference / longSide.size();
-	for (unsigned int i = 0; i < longSide.size(); ++i)
-	{
-		longSide[i].z = startDepth - (step * (float)i);
-	}
 
 	// Render the triangle
 	int longIndex = 0;
@@ -576,6 +544,14 @@ std::vector<glm::vec3> ConsoleRenderer::PlotLine(const glm::vec3& _p0, const glm
 		if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
 	}
 
+	// Estimate depth between start and end point
+	const float difference = _p0.z - _p1.z;
+	const float step = difference / static_cast<float>(points.size());
+	for (unsigned int i = 0; i < points.size(); ++i)
+	{
+		points[i].z = _p0.z - (step * static_cast<float>(i));
+	}
+
 	return points;
 }
 
@@ -622,10 +598,6 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	glm::vec4 pos1 = MVP * p1;
 	glm::vec4 pos2 = MVP * p2;
 	glm::vec4 pos3 = MVP * p3;
-
-	pos1 /= pos1.w;
-	pos2 /= pos2.w;
-	pos3 /= pos3.w;
 
 	pos1.x = (pos1.x + 1.0f) * (float)Width / 2;
 	pos2.x = (pos2.x + 1.0f) * (float)Width / 2;

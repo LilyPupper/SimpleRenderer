@@ -12,7 +12,7 @@
 #define CURRENT_TIME_MS std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch().count()
 
 Application::Application(const int& _width, const int& _height)
-	: m_Renderer(new SDLRenderer(_width, _height))
+	: m_Renderer(new ConsoleRenderer(_width, _height))
 	, m_ObjectFactory(new ObjectFactory(m_Renderer, m_ObjectList))
 {
 	Camera* cam = m_ObjectFactory->NewObject<Camera>();

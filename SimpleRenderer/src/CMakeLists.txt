@@ -25,4 +25,5 @@ add_custom_command(TARGET SimpleRenderer POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                        ${CMAKE_SOURCE_DIR}/models/ $<TARGET_FILE_DIR:SimpleRenderer>/models/)
 
+add_definitions(-DUNICODE -D_UNICODE)
 target_compile_features(SimpleRenderer PUBLIC cxx_std_17)
