@@ -388,24 +388,21 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	const glm::vec3 camForward = cameraTransform->GetForward();
 
 	Tri transformedTri = TriangleToScreenSpace(_tri, _transform);
-	glm::vec4 pos1 = transformedTri.v1;
-	glm::vec4 pos2 = transformedTri.v2;
-	glm::vec4 pos3 = transformedTri.v3;
-
-	transformedTri.RecalculateSurfaceNormal();
+	glm::vec4& pos1 = transformedTri.v1;
+	glm::vec4& pos2 = transformedTri.v2;
+	glm::vec4& pos3 = transformedTri.v3;
 
 	// Apply transformation matrix to current tri
 	glm::vec3 normal = transformedTri.GetSurfaceNormal();
-	glm::vec3 camToTri = glm::normalize(((transformedTri.v1 + transformedTri.v2 + transformedTri.v3) / 3.f) - glm::vec4(cameraTransform->GetPosition(), 1.f));
 
 	// Backface culling
-	//if (glm::dot(camToTri, glm::vec3{normal}) > 0.0f)
-	//	return;
+	if (glm::dot(camForward, glm::vec3{normal}) < 0.0f)
+		return;
 
 	// Calculate lighting
 	int index = 0;
 	const glm::vec3 LightDir = camForward;// (normalize(glm::vec3{-.25f, -.25f, 1.0f}));
-	float nDotL = glm::dot(LightDir, glm::vec3(normal));
+	float nDotL = glm::dot(LightDir, normal);
 	if (nDotL < 0.0f)
 	{
 		index = static_cast<int>(-nDotL * 9.f) + 1;
@@ -415,6 +412,8 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 		//only ambient lighting
 		index = 1;
 	}
+
+	assert(index >= 0 && index <= 10 && "index must be in the range of 0-10");
 
 	// Calculate lines and triangle direction
 	OrderPointsByYThenX(pos2, pos1);
@@ -426,6 +425,24 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	std::vector<glm::vec3> topSmallSide = PlotLine(pos2, pos1);
 	std::vector<glm::vec3> bottomSmallSide = PlotLine(pos2, pos3);
 	std::vector<glm::vec3> longSide = PlotLine(pos1, pos3);
+
+	// Wireframe view
+	std::vector<std::vector<glm::vec3>> lines = { topSmallSide, bottomSmallSide, longSide };
+	for each(std::vector<glm::vec3> line in lines)
+	{
+		for each(glm::vec3 point in line)
+		{
+			if (point.x < 0 || point.x > Width - 1 || point.y < 0 || point.y > Height - 1)
+				continue;
+	
+			const int x = point.x;
+			const int y = point.y;
+			const int drawIndex = point.x + (point.y * Width);
+			const wchar_t c = CharacterMap[index];
+			currentImageData[drawIndex] = c;
+		}
+	}
+	return;
 
 	// Render the triangle
 	int longIndex = 0;

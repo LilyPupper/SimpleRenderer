@@ -7,7 +7,7 @@
 </div>
 
 ## Getting Started
-- Clone the repo
+- Clone the repo with --recurse-submodules
 - Run 'Generate_VS20XX_Project.bat'
 - Open the project inside the folder called 'CMakeFiles'
 - Set 'SimpleRenderer' as the default project
