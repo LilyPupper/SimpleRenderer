@@ -48,8 +48,16 @@ Application::Application(const int& _width, const int& _height)
 	{
 		t1->SetScale(1.f);
 		t1->SetPosition(0.f, 0.0f, 0.0f);
-		t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+		t1->SetRotation(glm::vec3(0.f, 0.f, 180.f));
 	}
+
+	//RotatingModel* rm2 = m_ObjectFactory->NewObject<RotatingModel>();
+	//if (TransformComponent* t2 = rm2->GetTransform())
+	//{
+	//	t2->SetScale(1.f);
+	//	t2->SetPosition(5.f, 0.0f, 0.0f);
+	//	t2->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	//}
 }
 
 Application::~Application()

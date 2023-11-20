@@ -160,7 +160,6 @@ void TransformComponent::RebuildTransformation()
 	);
 
 	m_TransformationMatrix = m_TranslationMatrix * m_RotationMatrix * m_ScaleMatrix;
-	//m_TransformationMatrix = m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix;
 	m_RebuildMatrix = false;
 }
 

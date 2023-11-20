@@ -390,42 +390,47 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 
 	glm::mat4 mv {GetMV(_transform)};
 	
+	if (false)
+	{
+		Tri viewspacetri{ _tri.v1, _tri.v2, _tri.v3 };
+		viewspacetri *= mv;
+		viewspacetri.RecalculateSurfaceNormal();
 
-	Tri viewspacetri{_tri.v1, _tri.v2, _tri.v3};
-	viewspacetri *= mv;
-	viewspacetri.RecalculateSurfaceNormal();
+		glm::vec3 avgposview { (viewspacetri.v1 + viewspacetri.v2 + viewspacetri.v3) / 3.0f };
 
-	glm::vec3 avgposview { (viewspacetri.v1 + viewspacetri.v2 + viewspacetri.v3) / 3.0f };
-
-	glm::vec3 normy {viewspacetri.GetSurfaceNormal()};
-	// Backface culling
-	glm::vec3 diff {glm::normalize(avgposview - glm::vec3{0.0f, 0.0f, 1.f})};
-	//glm::vec3 norm {transformedTri.GetSurfaceNormal()};
-		float dot {glm::dot(diff, normy)};
-	if (dot < 0.0f)
-		return;
+		glm::vec3 normy {viewspacetri.GetSurfaceNormal()};
+		// Backface culling
+		glm::vec3 diff {glm::normalize(avgposview - glm::vec3{0.0f, 0.0f, 1.f})};
+		//glm::vec3 norm {transformedTri.GetSurfaceNormal()};
+		float dot{ glm::dot(diff, normy) };
+		if (dot < 0.0f)
+			return;
+	}
 
 	Tri transformedTri = TriangleToScreenSpace(_tri, _transform);
 	glm::vec4& pos1 = transformedTri.v1;
 	glm::vec4& pos2 = transformedTri.v2;
 	glm::vec4& pos3 = transformedTri.v3;
 
-	
-	
-
 	// Calculate lighting
-	//int index = 0;
-	//const glm::vec3 LightDir = camForward;// (normalize(glm::vec3{-.25f, -.25f, 1.0f}));
-	//float nDotL = glm::dot(LightDir, normal);
-	//if (nDotL < 0.0f)
-	//{
-	//	index = static_cast<int>(-nDotL * 9.f) + 1;
-	//}
-	//else
-	//{
-		//only ambient lighting
-		int index = 1;
-	//}
+	int index = 0;
+	Tri worldSpaceTri = _tri * _transform->GetTransformation();
+	worldSpaceTri.RecalculateSurfaceNormal();
+	glm::vec3 avgPos = (worldSpaceTri.v1 + worldSpaceTri.v2 + worldSpaceTri.v3) / 3.f;
+
+	glm::vec3 lightPos{0.f, 10.f, 0.f};
+	glm::vec3 lightDir = glm::normalize(avgPos - lightPos);
+	
+	float nDotL = glm::dot(lightDir, worldSpaceTri.GetSurfaceNormal());
+	if (nDotL < 0.0f)
+	{
+		index = static_cast<int>(-nDotL * 9.f) + 1;
+	}
+	else
+	{
+		// only ambient lighting
+		index = 1;
+	}
 
 	assert(index >= 0 && index <= 10 && "index must be in the range of 0-10");
 
@@ -441,22 +446,22 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	std::vector<glm::vec3> longSide = PlotLine(pos1, pos3);
 
 	// Wireframe view
-	std::vector<std::vector<glm::vec3>> lines = { topSmallSide, bottomSmallSide, longSide };
-	for each(std::vector<glm::vec3> line in lines)
-	{
-		for each(glm::vec3 point in line)
-		{
-			if (point.x < 0 || point.x > Width - 1 || point.y < 0 || point.y > Height - 1)
-				continue;
-	
-			const int x = point.x;
-			const int y = point.y;
-			const int drawIndex = point.x + (point.y * Width);
-			const wchar_t c = CharacterMap[index];
-			currentImageData[drawIndex] = c;
-		}
-	}
-	return;
+	//std::vector<std::vector<glm::vec3>> lines = { topSmallSide, bottomSmallSide, longSide };
+	//for each(std::vector<glm::vec3> line in lines)
+	//{
+	//	for each(glm::vec3 point in line)
+	//	{
+	//		if (point.x < 0 || point.x > Width - 1 || point.y < 0 || point.y > Height - 1)
+	//			continue;
+	//
+	//		const int x = point.x;
+	//		const int y = point.y;
+	//		const int drawIndex = point.x + (point.y * Width);
+	//		const wchar_t c = CharacterMap[index];
+	//		currentImageData[drawIndex] = c;
+	//	}
+	//}
+	//return;
 
 	// Render the triangle
 	int longIndex = 0;
@@ -606,9 +611,16 @@ void ConsoleRenderer::OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low)
 
 glm::mat4 ConsoleRenderer::GetMVP(TransformComponent* _transform) const
 {
+	glm::mat4 asciiStretchReduction = {
+	3.f, 0.f, 0.f, 0.f,
+	0.f, 1.f, 0.f, 0.f,
+	0.f, 0.f, 1.f, 0.f,
+	0.f, 0.f, 0.f, 1.f
+	};
+
 	const glm::mat4 view = glm::inverse(Camera::GetCameraMatrix());
 	const glm::mat4 model = _transform->GetTransformation();
-	const glm::mat4 projection = glm::perspective(glm::degrees(60.0f), (float)Width / (float)Height, 0.0f, 1000.f);
+	const glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)Width / (float)Height, 0.1f, 1.f) *asciiStretchReduction;
 	const glm::mat4 mvp = projection * view * model;
 
 	return mvp;
@@ -623,26 +635,37 @@ glm::mat4 ConsoleRenderer::GetMV(TransformComponent* _transform) const
 	return mv;
 }
 
-
+static float _max = 0.f;
+static float _min = 0.f;
 
 Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform) const
 {
-	glm::vec4 p1(_tri.v1);
-	glm::vec4 p2(_tri.v2);
-	glm::vec4 p3(_tri.v3);
-
 	glm::mat4 MVP = GetMVP(_transform);
 
-	glm::vec4 pos1 = MVP * p1;
-	glm::vec4 pos2 = MVP * p2;
-	glm::vec4 pos3 = MVP * p3;
+	glm::vec4 pos1 = MVP * _tri.v1;
+	glm::vec4 pos2 = MVP * _tri.v2;
+	glm::vec4 pos3 = MVP * _tri.v3;
 	
 	Tri transformedTri(pos1, pos2, pos3);
 	transformedTri.RecalculateSurfaceNormal();
 
-	pos1 /= pos1.w;
-	pos2 /= pos2.w;
-	pos3 /= pos3.w;
+	pos1.x /= pos1.w;
+	pos2.x /= pos2.w;
+	pos3.x /= pos3.w;
+	
+	pos1.y /= pos1.w;
+	pos2.y /= pos2.w;
+	pos3.y /= pos3.w;
+	
+	pos1.z /= pos1.w;
+	pos2.z /= pos2.w;
+	pos3.z /= pos3.w;
+
+	float f = 1000.f;
+	float n = 0.1f;
+	pos1.z = (((f - n) * pos1.z) + n + f) / 2.f;
+	pos2.z = (((f - n) * pos2.z) + n + f) / 2.f;
+	pos3.z = (((f - n) * pos3.z) + n + f) / 2.f;
 
 	transformedTri.v1.x = (pos1.x + 1.0f) * ((float)Width / 2);
 	transformedTri.v2.x = (pos2.x + 1.0f) * ((float)Width / 2);
@@ -651,10 +674,6 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	transformedTri.v1.y = (pos1.y + 1.0f) * ((float)Height / 2);
 	transformedTri.v2.y = (pos2.y + 1.0f) * ((float)Height / 2);
 	transformedTri.v3.y = (pos3.y + 1.0f) * ((float)Height / 2);
-
-	transformedTri.v1.z = pos1.z;
-	transformedTri.v2.z = pos2.z;
-	transformedTri.v3.z = pos3.z;
 
 	return transformedTri;
 }

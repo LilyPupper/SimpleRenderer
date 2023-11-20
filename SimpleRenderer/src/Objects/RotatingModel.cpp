@@ -30,12 +30,6 @@ void RotatingModel::Update(const float& _deltaTime)
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
 		
 		//t->SetRotation(r * m_Time * 15.f);
-
-		//glm::vec3 scale = t->GetScale();
-		//t->SetScale(scale.x + _deltaTime, scale.y, scale.z);
-		//
-		//glm::vec3 pos = t->GetPosition();
-		//t->SetPosition(pos.x + _deltaTime, pos.y, pos.z);
 	}
 }
 

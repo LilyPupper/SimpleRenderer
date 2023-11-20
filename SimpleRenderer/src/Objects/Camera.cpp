@@ -44,12 +44,12 @@ void Camera::Update(const float& _deltaTime)
 	}
 	if (GetKeyState('D') & 0x8000)
 	{
-		const glm::vec3 move = -t->GetRight() * moveSpeed;
+		const glm::vec3 move = t->GetRight() * moveSpeed;
 		t->Translate(move);
 	}
 	if (GetKeyState('A') & 0x8000)
 	{
-		const glm::vec3 move = t->GetRight() * moveSpeed;
+		const glm::vec3 move = -t->GetRight() * moveSpeed;
 		t->Translate(move);
 	}
 	if (GetKeyState('Q') & 0x8000)
