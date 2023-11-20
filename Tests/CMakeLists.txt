@@ -12,6 +12,7 @@ include_directories(${SimpleRenderer_SOURCE_DIR}/SimpleRenderer/src)
 
 target_include_directories(Tests SYSTEM PRIVATE "../vendor/sdl/include")
 target_include_directories(Tests SYSTEM	PRIVATE "../vendor/googletest/googletest/include")
+target_include_directories(Tests SYSTEM	PRIVATE "../vendor/googletest/googlemock/include")
 
 set_target_properties(Tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${SimpleRenderer_SOURCE_DIR}/bin/Tests)
 

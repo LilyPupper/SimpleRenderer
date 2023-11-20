@@ -387,33 +387,45 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	{
 		return;
 	}
-	const glm::vec3 camForward = cameraTransform->GetForward();
+
+	glm::mat4 mv {GetMV(_transform)};
+	
+
+	Tri viewspacetri{_tri.v1, _tri.v2, _tri.v3};
+	viewspacetri *= mv;
+	viewspacetri.RecalculateSurfaceNormal();
+
+	glm::vec3 avgposview { (viewspacetri.v1 + viewspacetri.v2 + viewspacetri.v3) / 3.0f };
+
+	glm::vec3 normy {viewspacetri.GetSurfaceNormal()};
+	// Backface culling
+	glm::vec3 diff {glm::normalize(avgposview - glm::vec3{0.0f, 0.0f, 1.f})};
+	//glm::vec3 norm {transformedTri.GetSurfaceNormal()};
+		float dot {glm::dot(diff, normy)};
+	if (dot < 0.0f)
+		return;
 
 	Tri transformedTri = TriangleToScreenSpace(_tri, _transform);
 	glm::vec4& pos1 = transformedTri.v1;
 	glm::vec4& pos2 = transformedTri.v2;
 	glm::vec4& pos3 = transformedTri.v3;
 
-	// Apply transformation matrix to current tri
-	glm::vec3 normal = transformedTri.GetSurfaceNormal();
-
-	// Backface culling
-	if (glm::dot(camForward, glm::vec3{normal}) < 0.0f)
-		return;
+	
+	
 
 	// Calculate lighting
-	int index = 0;
-	const glm::vec3 LightDir = camForward;// (normalize(glm::vec3{-.25f, -.25f, 1.0f}));
-	float nDotL = glm::dot(LightDir, normal);
-	if (nDotL < 0.0f)
-	{
-		index = static_cast<int>(-nDotL * 9.f) + 1;
-	}
-	else
-	{
+	//int index = 0;
+	//const glm::vec3 LightDir = camForward;// (normalize(glm::vec3{-.25f, -.25f, 1.0f}));
+	//float nDotL = glm::dot(LightDir, normal);
+	//if (nDotL < 0.0f)
+	//{
+	//	index = static_cast<int>(-nDotL * 9.f) + 1;
+	//}
+	//else
+	//{
 		//only ambient lighting
-		index = 1;
-	}
+		int index = 1;
+	//}
 
 	assert(index >= 0 && index <= 10 && "index must be in the range of 0-10");
 
@@ -594,13 +606,24 @@ void ConsoleRenderer::OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low)
 
 glm::mat4 ConsoleRenderer::GetMVP(TransformComponent* _transform) const
 {
-	glm::mat4 modelView = glm::inverse(Camera::GetCameraMatrix()) * _transform->GetTransformation();
-	glm::mat4 projection = glm::perspective(135.0f, (float)Width / (float)Height, 0.0f, 1000.f);
-	glm::vec4 viewport(0.0f, 0.0f, Width, Height);
-	glm::mat4 mvp = projection * modelView;
+	const glm::mat4 view = glm::inverse(Camera::GetCameraMatrix());
+	const glm::mat4 model = _transform->GetTransformation();
+	const glm::mat4 projection = glm::perspective(glm::degrees(60.0f), (float)Width / (float)Height, 0.0f, 1000.f);
+	const glm::mat4 mvp = projection * view * model;
 
 	return mvp;
 }
+
+glm::mat4 ConsoleRenderer::GetMV(TransformComponent* _transform) const
+{
+	const glm::mat4 view = glm::inverse(Camera::GetCameraMatrix());
+	const glm::mat4 model = _transform->GetTransformation();
+	const glm::mat4 mv = view * model;
+
+	return mv;
+}
+
+
 
 Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform) const
 {
@@ -608,26 +631,30 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	glm::vec4 p2(_tri.v2);
 	glm::vec4 p3(_tri.v3);
 
-	p1.w = 1.f;
-	p2.w = 1.f;
-	p3.w = 1.f;
-
 	glm::mat4 MVP = GetMVP(_transform);
 
 	glm::vec4 pos1 = MVP * p1;
 	glm::vec4 pos2 = MVP * p2;
 	glm::vec4 pos3 = MVP * p3;
-
-	pos1.x = (pos1.x + 1.0f) * (float)Width / 2;
-	pos2.x = (pos2.x + 1.0f) * (float)Width / 2;
-	pos3.x = (pos3.x + 1.0f) * (float)Width / 2;
-
-	pos1.y = (pos1.y + 1.0f) * (float)Height / 2;
-	pos2.y = (pos2.y + 1.0f) * (float)Height / 2;
-	pos3.y = (pos3.y + 1.0f) * (float)Height / 2;
-
+	
 	Tri transformedTri(pos1, pos2, pos3);
 	transformedTri.RecalculateSurfaceNormal();
+
+	pos1 /= pos1.w;
+	pos2 /= pos2.w;
+	pos3 /= pos3.w;
+
+	transformedTri.v1.x = (pos1.x + 1.0f) * ((float)Width / 2);
+	transformedTri.v2.x = (pos2.x + 1.0f) * ((float)Width / 2);
+	transformedTri.v3.x = (pos3.x + 1.0f) * ((float)Width / 2);
+	
+	transformedTri.v1.y = (pos1.y + 1.0f) * ((float)Height / 2);
+	transformedTri.v2.y = (pos2.y + 1.0f) * ((float)Height / 2);
+	transformedTri.v3.y = (pos3.y + 1.0f) * ((float)Height / 2);
+
+	transformedTri.v1.z = pos1.z;
+	transformedTri.v2.z = pos2.z;
+	transformedTri.v3.z = pos3.z;
 
 	return transformedTri;
 }

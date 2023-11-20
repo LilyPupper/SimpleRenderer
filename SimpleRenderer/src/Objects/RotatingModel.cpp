@@ -24,12 +24,12 @@ void RotatingModel::Update(const float& _deltaTime)
 	TransformComponent* t = static_cast<TransformComponent*>(FindComponentOfType(TRANSFORM));
 	if (t != nullptr)
 	{
-		const glm::vec3 euler = t->GetEuler();
-		const glm::vec3 euler1 = t->GetEuler();
+		const glm::vec3 euler = t->GetRotation();
+		const glm::vec3 euler1 = t->GetRotation();
 		
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
 		
-		t->SetRotation(r * m_Time * 15.f);
+		//t->SetRotation(r * m_Time * 15.f);
 
 		//glm::vec3 scale = t->GetScale();
 		//t->SetScale(scale.x + _deltaTime, scale.y, scale.z);

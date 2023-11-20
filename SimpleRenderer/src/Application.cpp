@@ -20,35 +20,36 @@ Application::Application(const int& _width, const int& _height)
 	Camera* cam = m_ObjectFactory->NewObject<Camera>();
 	if (TransformComponent* tc = cam->GetTransform())
 	{
-		tc->SetPosition(0.f, 0.f, 0.f);
+		tc->SetPosition(0.f, 0.f, 3.f);
+		tc->SetRotation({0.0f, 0.0f, 0.0f});
 	}
 
-	float range = 15.f;
-	float step = 15.f;
-	for (float x = -range; x < range; x += step)
-	{
-		for (float y = -range; y < range; y += step)
-		{
-			for (float z = -range; z < range; z += step)
-			{
-				RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
-				if (TransformComponent* t1 = rm1->GetTransform())
-				{
-					t1->SetScale(5.f);
-					t1->SetPosition(x, y, z);
-					t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
-				}
-			}
-		}
-	}
-
-	//RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
-	//if (TransformComponent* t1 = rm1->GetTransform())
+	//float range = 15.f;
+	//float step = 15.f;
+	//for (float x = -range; x <= range; x += step)
 	//{
-	//	t1->SetScale(5.f);
-	//	t1->SetPosition(0.f, 0.0f, 1.0f);
-	//	t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	//	for (float y = -range; y <= range; y += step)
+	//	{
+	//		for (float z = -range; z <= range; z += step)
+	//		{
+	//			RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
+	//			if (TransformComponent* t1 = rm1->GetTransform())
+	//			{
+	//				t1->SetScale(5.f);
+	//				t1->SetPosition(x + y, y, z);
+	//				t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	//			}
+	//		}
+	//	}
 	//}
+
+	RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
+	if (TransformComponent* t1 = rm1->GetTransform())
+	{
+		t1->SetScale(1.f);
+		t1->SetPosition(0.f, 0.0f, 0.0f);
+		t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	}
 }
 
 Application::~Application()

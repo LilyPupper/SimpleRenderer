@@ -21,8 +21,13 @@ public:
 	void Scale(const float& _scale);
 	void Scale(const float& _x, const float& _y, const float& _z);
 
+	inline glm::vec3 GetScale() const { return m_Scale; }
+
 	// Set rotation in degrees
 	void SetRotation(const glm::vec3& _eulerAngles);
+	glm::vec3 GetRotation(bool _degrees = true) const;
+	glm::quat GetQuaternion() const { return m_Rotation; }
+
 	void Rotate(const float& _theta, const glm::vec3& _axis);
 	void RotateX(const float& _theta);
 	void RotateY(const float& _theta);
@@ -31,21 +36,18 @@ public:
 	void SetPosition(const glm::vec3& _pos);
 	void SetPosition(const float& _x, const float& _y, const float& _z);
 
+	inline glm::vec3 GetPosition() const { return m_Translation; }
+
 	void Translate(const glm::vec3& _translation);
 	void Translate(const float& _x, const float& _y, const float& _z);
 
-	inline glm::vec3 GetScale() const { return m_Scale; }
-	inline glm::mat4 GetScaleMatrix() const { return m_ScaleMatrix; }
-	
-	inline glm::vec3 GetPosition() const { return m_Translation; }
-	inline glm::mat4 GetPositionMatrix() const { return m_TransformationMatrix; }
+	glm::vec3 GetForward() const;
+	glm::vec3 GetUp() const;
+	glm::vec3 GetRight() const;
 
-	glm::vec3 GetForward();
-	glm::vec3 GetUp();
-	glm::vec3 GetRight();
-
-	glm::vec3 GetEuler(bool _degrees = true) const;
-	inline glm::mat4 GetRotationMatrix() const { return m_RotationMatrix; }
+	glm::mat4 GetTranslationMatrix();
+	glm::mat4 GetRotationMatrix();
+	glm::mat4 GetScaleMatrix();
 
 	void RebuildTransformation();
 	glm::mat4 GetTransformation();

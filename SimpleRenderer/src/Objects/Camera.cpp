@@ -29,27 +29,61 @@ void Camera::Update(const float& _deltaTime)
 	{
 		return;
 	}
- 
-	const float speed = 100.f * _deltaTime;
+
+	// Move
+	const float moveSpeed = 10.f * _deltaTime;
 	if (GetKeyState('W') & 0x8000)
 	{
-		glm::vec3 move = -t->GetUp() * speed;
+		const glm::vec3 move = -t->GetForward() * moveSpeed;
 		t->Translate(move);
 	}
 	if (GetKeyState('S') & 0x8000)
 	{
-		glm::vec3 move = t->GetUp() * speed;
+		const glm::vec3 move = t->GetForward() * moveSpeed;
 		t->Translate(move);
 	}
 	if (GetKeyState('D') & 0x8000)
 	{
-		glm::vec3 move = t->GetRight() * speed;
+		const glm::vec3 move = -t->GetRight() * moveSpeed;
 		t->Translate(move);
 	}
 	if (GetKeyState('A') & 0x8000)
 	{
-		glm::vec3 move = -t->GetRight() * speed;
+		const glm::vec3 move = t->GetRight() * moveSpeed;
 		t->Translate(move);
+	}
+	if (GetKeyState('Q') & 0x8000)
+	{
+		const glm::vec3 move = t->GetUp() * moveSpeed;
+		t->Translate(move);
+	}
+	if (GetKeyState('E') & 0x8000)
+	{
+		const glm::vec3 move = -t->GetUp() * moveSpeed;
+		t->Translate(move);
+	}
+
+	// Rotate
+	const float rotSpeed = 50.f * _deltaTime;
+	if (GetKeyState(VK_UP) & 0x8000)
+	{
+		const float rot = -rotSpeed;
+		t->RotateX(rot);
+	}
+	if (GetKeyState(VK_DOWN) & 0x8000)
+	{
+		const float rot = rotSpeed;
+		t->RotateX(rot);
+	}
+	if (GetKeyState(VK_RIGHT) & 0x8000)
+	{
+		const float rot = -rotSpeed;
+		t->RotateY(rot);
+	}
+	if (GetKeyState(VK_LEFT) & 0x8000)
+	{
+		const float rot = rotSpeed;
+		t->RotateY(rot);
 	}
 }
 
