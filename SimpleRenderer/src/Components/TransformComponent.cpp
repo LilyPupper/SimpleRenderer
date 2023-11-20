@@ -99,7 +99,7 @@ void TransformComponent::Translate(const float& _x, const float& _y, const float
 
 glm::vec3 TransformComponent::GetForward()
 {
-	return glm::vec3{0.0, 0.0, 1.0};
+	//return glm::vec3{0.0, 0.0, 1.0};
 	if (m_RebuildMatrix)
 		RebuildTransformation();
 
@@ -110,7 +110,7 @@ glm::vec3 TransformComponent::GetForward()
 
 glm::vec3 TransformComponent::GetUp()
 {
-	return glm::vec3{0.0, 1.0, 0.0};
+	//return glm::vec3{0.0, 1.0, 0.0};
 	if (m_RebuildMatrix)
 		RebuildTransformation();
 
@@ -121,7 +121,7 @@ glm::vec3 TransformComponent::GetUp()
 
 glm::vec3 TransformComponent::GetRight()
 {
-	return glm::vec3{1.0, 0.0, 0.0};
+	//return glm::vec3{1.0, 0.0, 0.0};
 	if (m_RebuildMatrix)
 		RebuildTransformation();
 
@@ -147,15 +147,13 @@ void TransformComponent::RebuildTransformation()
 	m_RotationMatrix = glm::toMat4(m_Rotation);
 
 	m_TranslationMatrix = glm::mat4(
-		1.0f, 0.0f, 0.0f, m_Translation.x,
-		0.0f, 1.0f, 0.0f, m_Translation.y,
-		0.0f, 0.0f, 1.0f, m_Translation.z,
-		0.0f, 0.0f, 0.0f, 1.0f
+		1.0f, 0.0f, 0.0f, 0.f,
+		0.0f, 1.0f, 0.0f, 0.f,
+		0.0f, 0.0f, 1.0f, 0.f,
+		m_Translation.x, m_Translation.y, m_Translation.z, 1.0f
 	);
-	//m_TranslationMatrix = glm::translate(m_TranslationMatrix, m_Translation);
 
 	m_TransformationMatrix = m_ScaleMatrix * m_RotationMatrix * m_TranslationMatrix;
-
 	m_RebuildMatrix = false;
 }
 

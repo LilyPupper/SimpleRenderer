@@ -33,7 +33,7 @@ Object* ObjectFactory::NewObject(ObjectType type)
 		{
 			obj = new RotatingModel();
 
-			const char* meshID = _Renderer->RegisterMesh("models\\Monkey.obj");
+			const char* meshID = _Renderer->RegisterMesh("models\\Cube.obj");
 			obj->AddComponent(new MeshComponent(obj, _Renderer, meshID));
 
 			break;

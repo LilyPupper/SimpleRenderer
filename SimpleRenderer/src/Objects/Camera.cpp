@@ -30,15 +30,15 @@ void Camera::Update(const float& _deltaTime)
 		return;
 	}
  
-	const float speed = 200.f * _deltaTime;
+	const float speed = 100.f * _deltaTime;
 	if (GetKeyState('W') & 0x8000)
 	{
-		glm::vec3 move = t->GetForward() * speed;
+		glm::vec3 move = -t->GetUp() * speed;
 		t->Translate(move);
 	}
 	if (GetKeyState('S') & 0x8000)
 	{
-		glm::vec3 move = -t->GetForward() * speed;
+		glm::vec3 move = t->GetUp() * speed;
 		t->Translate(move);
 	}
 	if (GetKeyState('D') & 0x8000)

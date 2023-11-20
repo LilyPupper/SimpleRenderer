@@ -49,6 +49,8 @@ public:
 
 		return _meshPath;
 	}
+	
+	inline HWND GetWindow() const { return WindowHandle; }
 
 protected:
 	static void ShowConsole()
@@ -62,6 +64,8 @@ protected:
 	}
 
 protected:
+	HWND WindowHandle;
+
 	int Width, Height;
 
 	std::vector<std::pair<const char*, TransformComponent* const>> ObjectsToRender;

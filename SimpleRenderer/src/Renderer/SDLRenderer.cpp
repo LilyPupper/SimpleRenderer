@@ -11,6 +11,9 @@ SDLRenderer::SDLRenderer(const unsigned int& _width, const unsigned int& _height
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_CreateWindowAndRenderer(Width, Height, 0, &Window, &Renderer);
+
+	WindowHandle = (HWND)SDL_GetProperty(SDL_GetWindowProperties(Window), "SDL.window.win32.hwnd", nullptr);
+	const int a = 10;
 }
 
 SDLRenderer::~SDLRenderer()

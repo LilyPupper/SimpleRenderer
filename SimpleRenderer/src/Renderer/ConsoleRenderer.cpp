@@ -158,6 +158,8 @@ bool ConsoleRenderer::Initialise()
 		return false;
 	}
 
+	WindowHandle = GetConsoleWindow();
+
 	return true;
 }
 

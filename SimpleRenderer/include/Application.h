@@ -15,10 +15,14 @@ public:
 
 	void Run();
 
+	void ProcessInput();
+	void ClipMouse();
+
 private:
 	std::vector<Object*> m_ObjectList;
 	RendererBase* m_Renderer;
 	ObjectFactory* m_ObjectFactory;
 
-	bool m_Running = true;
+	bool m_Running;
+	bool m_CursorLocked;
 };
