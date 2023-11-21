@@ -19,6 +19,8 @@ public:
 	glm::vec4 v2;
 	glm::vec4 v3;
 
+	bool Discard = false;
+
 private:
 	glm::vec4 m_SurfaceNormal;
 };

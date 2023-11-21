@@ -23,19 +23,18 @@ public:
 	ConsoleRenderer(const unsigned int _width, const unsigned int _height);
 	virtual ~ConsoleRenderer() override;
 
-	bool Initialise();
+	bool InitialiseConsoleWindow();
 
 	virtual void Render(const float& _deltaTime) override;
 
 	void PushToScreen(const float& _deltaTime);
 
-	// RAYCAST MODE
-	void RenderRaycast();
-	wchar_t RaycastPixel(unsigned int _column, unsigned int _row);
-
-	// RASTERIZE MODE
-	void RenderRasterize();
 	void RasterizeTri(const Tri& _tri, TransformComponent* const _transform);
+	void DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform);
+
+	void DrawTriangleTopHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide);
+	void DrawTriangleBottomHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide, const int _longSideMiddleIndex);
+
 	std::vector<glm::vec3> PlotLine(const glm::vec3& _p0, const glm::vec3& _p1);
 	void OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low);
 
@@ -75,7 +74,7 @@ protected:
 	int PreviousScreenBufferIndex;
 	std::mutex DoubleBufferMtx;
 
-	wchar_t* ScreenBuffers[2];
+	wchar_t* ScreenBuffers[SCREEN_BUFFER_COUNT];
 
 	float* DepthData;
 	std::vector<unsigned int> ImageHorizontalIter, m_ImageVerticalIter;

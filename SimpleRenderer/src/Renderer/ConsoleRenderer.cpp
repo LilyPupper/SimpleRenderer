@@ -2,12 +2,10 @@
 
 #include "Tri.h"
 #include "Mesh.h"
-#include "Physics.h"
 
 #include "Components/TransformComponent.h"
 
 #include <iostream>
-#include <stdio.h>
 #include <conio.h>
 #include <limits>
 #include <algorithm>
@@ -20,13 +18,11 @@
 #undef min
 
 ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _height)
-	: RendererBase(_width, _height)
+	: RendererBase(_width, _height, 60.f, 0.1f, 1000.f)
 	, ConsoleBuffer(nullptr)
 	, Console(INVALID_HANDLE_VALUE)
 	, ThreadPool(std::thread::hardware_concurrency())
 {
-	ShowConsole();
-
 	CurrentScreenBufferIndex = 0;
 	PreviousScreenBufferIndex = 0;
 
@@ -43,14 +39,11 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	for (unsigned int i = 0; i < _height; ++i)
 		m_ImageVerticalIter[i] = i;
 
-	srand(1);
-
 	Futures.resize(std::thread::hardware_concurrency());
 
 	bRenderThreadContinue = true;
 	bIsScreenBufferReady = false;
 
-	RenderMode = RENDER_MODE::Rasterize;
 	bMultithreaded = true;
 
 	ThreadPool.enqueue([this]()
@@ -66,7 +59,7 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 		}
 	});
 
-	Initialise();
+	InitialiseConsoleWindow();
 }
 
 ConsoleRenderer::~ConsoleRenderer()
@@ -85,8 +78,10 @@ ConsoleRenderer::~ConsoleRenderer()
 	delete[] DepthData;
 }
 
-bool ConsoleRenderer::Initialise()
+bool ConsoleRenderer::InitialiseConsoleWindow()
 {
+	ShowConsole();
+
 	// Set font size
 	const HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hStdOut != NULL)
@@ -165,169 +160,12 @@ bool ConsoleRenderer::Initialise()
 
 void ConsoleRenderer::Render(const float& _deltaTime)
 { 
-	switch(RenderMode)
+	const TransformComponent* cameraTransform = Camera::Main->GetTransform();
+	if (!cameraTransform)
 	{
-		case Raytrace:
-		{
-			RenderRaycast();
-			break;
-		}
-		case Rasterize:
-		{
-			RenderRasterize();
-			break;
-		}
+		return;
 	}
 
-	ObjectsToRender.clear();
-
-	if(!bIsScreenBufferReady)
-	{
-		bIsScreenBufferReady = true;
-		NextScreenBuffer();
-	}
-}
-
-void ConsoleRenderer::PushToScreen(const float& _deltaTime)
-{
-	DWORD dwBytesWritten;
-	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
-}
-
-// https://youtu.be/1KTgc2SEt50
-// https://github.com/TheCherno/RayTracing/blob/master/RayTracing/src
-void ConsoleRenderer::RenderRaycast()
-{
-	wchar_t* currentScreenBuffer = GetCurrentScreenBuffer();
-
-	if(bMultithreaded)
-	{
-		std::for_each(std::execution::par_unseq, m_ImageVerticalIter.begin(), m_ImageVerticalIter.end(),
-			[this, &currentScreenBuffer](unsigned int y)
-			{
-				std::for_each(std::execution::par_unseq, ImageHorizontalIter.begin(), ImageHorizontalIter.end(),
-					[this, &currentScreenBuffer, &y](unsigned int x)
-					{
-						currentScreenBuffer[x + y * Width] = RaycastPixel(x, y);
-					});
-			});
-
-		//Futures.clear();
-		//for (unsigned int y = 0; y < RenderTex.GetHeight(); ++y)
-		//{
-		//	for(int x = 0; x<RenderTex.GetWidth(); ++x)
-		//	{
-		//		Futures.push_back(ThreadPool.enqueue([this, x, y, currentScreenBuffer]()
-		//		{
-		//
-		//				currentScreenBuffer[x + y * Width] = RaycastPixel(x, y);
-		//		}));
-		//	}
-		//}
-		//for(const std::future<void>& future : Futures)
-		//{
-		//	future.wait();
-		//}
-
-		//const int increment = Height / std::thread::hardware_concurrency();
-		//int i=0;
-		//for (unsigned int y = 0; y < Height; y+=increment)
-		//{
-		//	Futures[i++] = (ThreadPool.enqueue([increment, this, y, currentScreenBuffer]()
-		//	{
-		//
-		//		for(int newY = y; newY<y+increment; newY++)
-		//		{
-		//			for(int x = 0; x < Width; x++)
-		//			{
-		//				currentScreenBuffer[x + newY * Width] = RaycastPixel(x, newY);
-		//			}
-		//		}
-		//	}));
-		//}
-		//for(const auto& future : Futures)
-		//{
-		//	future.wait();
-		//}
-	}
-	// Single-threaded
-	else
-	{
-		for (unsigned int y = 0; y < Height; ++y)
-		{
-			for (unsigned int x = 0; x < Width; ++x)
-			{
-				currentScreenBuffer[x + y * Width] = RaycastPixel(x, y);
-			}
-		}
-	}
-}
-
-wchar_t ConsoleRenderer::RaycastPixel(unsigned int _column, unsigned int _row)
-{
-	const wchar_t* CharacterMap = L".:-=+*8#%@";
-	
-	wchar_t result = L' ';
-
-	// For every mesh
-	for (unsigned int meshIndex = 0; meshIndex < ObjectsToRender.size(); ++meshIndex)
-	{
-		Mesh* mesh = RegisteredModels[ObjectsToRender[meshIndex].first];
-		TransformComponent* transform = ObjectsToRender[meshIndex].second;
-
-		float lastDistance = std::numeric_limits<float>::infinity();
-
-		// Raycast every triangle
-		for (unsigned int triIndex = 0; triIndex < mesh->m_Triangles.size(); ++triIndex)
-		{
-			// Apply transformation matrix to current tri
-			TransformComponent* cameraTransform = Camera::Main->GetTransform();
-			if (!cameraTransform)
-			{
-				return result;
-			}
-
-			Tri transformedTri = TriangleToScreenSpace(mesh->m_Triangles[triIndex], transform);
-
-			const glm::vec3 normal = transformedTri.GetSurfaceNormal();
-
-			const glm::vec3 camForward = cameraTransform->GetForward();
-			// Backface culling
-			if (glm::dot(camForward, normal) > 0.0f)
-				continue;
-
-			// Raycast
-			float baryX, baryY, distance;
-			if (Physics::IntersectRayTriangle(cameraTransform->GetPosition(), camForward, transformedTri, baryX, baryY, distance))
-			{
-				// Depth test
-				if (distance < lastDistance)
-				{
-					int index = 0;
-					const glm::vec3 LightDir = camForward;
-					float nDotL = glm::dot(LightDir, normal);
-					if (nDotL < 0.0f)
-					{
-						index = static_cast<int>(-nDotL * 9.f) + 1;
-					}
-					else
-					{
-						//only ambient lighting
-						index = 1;
-					}
-
-					result = CharacterMap[index];
-					lastDistance = distance;
-				}
-			}
-		}
-	}
-
-	return result;
-}
-
-void ConsoleRenderer::RenderRasterize()
-{
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
 
 	// Reset depth texture
@@ -373,66 +211,82 @@ void ConsoleRenderer::RenderRasterize()
 			}
 		}
 	}
+
+	ObjectsToRender.clear();
+
+	if(!bIsScreenBufferReady)
+	{
+		bIsScreenBufferReady = true;
+		NextScreenBuffer();
+	}
 }
 
-// TODO: Implement better lighting
+void ConsoleRenderer::PushToScreen(const float& _deltaTime)
+{
+	DWORD dwBytesWritten;
+	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
+}
+
 void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _transform)
 {
-	wchar_t* currentImageData = GetCurrentScreenBuffer();
-
-	const wchar_t* CharacterMap = L".:-=+*8#%@";
-
-	TransformComponent* cameraTransform = Camera::Main->GetTransform();
-	if (!cameraTransform)
+	Tri transformedTri = TriangleToScreenSpace(_tri, _transform);
+	if (transformedTri.Discard)
 	{
+		transformedTri.Discard = false;
 		return;
 	}
-
-	glm::mat4 mv {GetMV(_transform)};
 	
-	if (false)
-	{
-		Tri viewspacetri{ _tri.v1, _tri.v2, _tri.v3 };
-		viewspacetri *= mv;
-		viewspacetri.RecalculateSurfaceNormal();
+	DrawTriangleToScreen(_tri, transformedTri, _transform);
+}
 
-		glm::vec3 avgposview { (viewspacetri.v1 + viewspacetri.v2 + viewspacetri.v3) / 3.0f };
+void Barycentric(const glm::vec3& p, const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, float& u, float& v, float& w)
+{
+	const glm::vec3 v0 = b -a;
+	const glm::vec3 v1 = c - a;
+	const glm::vec3 v2 = p - a;
+	const float d00 = glm::dot(v0, v0);
+	const float d01 = glm::dot(v0, v1);
+	const float d11 = glm::dot(v1, v1);
+	const float d20 = glm::dot(v2, v0);
+	const float d21 = glm::dot(v2, v1);
+	const float denom = d00 * d11 - d01 * d01;
+	v = (d11 * d20 - d01 * d21) / denom;
+	w = (d00 * d21 - d01 * d20) / denom;
+	u = 1.f -v - w;
+}
 
-		glm::vec3 normy {viewspacetri.GetSurfaceNormal()};
-		// Backface culling
-		glm::vec3 diff {glm::normalize(avgposview - glm::vec3{0.0f, 0.0f, 1.f})};
-		//glm::vec3 norm {transformedTri.GetSurfaceNormal()};
-		float dot{ glm::dot(diff, normy) };
-		if (dot < 0.0f)
-			return;
-	}
-
-	Tri transformedTri = TriangleToScreenSpace(_tri, _transform);
-	glm::vec4& pos1 = transformedTri.v1;
-	glm::vec4& pos2 = transformedTri.v2;
-	glm::vec4& pos3 = transformedTri.v3;
+void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform)
+{
+	wchar_t* currentImageData = GetCurrentScreenBuffer();
+	const wchar_t* CharacterMap = L".:-=+*8#%@";
 
 	// Calculate lighting
 	int index = 0;
-	Tri worldSpaceTri = _tri * _transform->GetTransformation();
+	Tri worldSpaceTri = _worldTri * _transform->GetTransformation();
 	worldSpaceTri.RecalculateSurfaceNormal();
 	glm::vec3 avgPos = (worldSpaceTri.v1 + worldSpaceTri.v2 + worldSpaceTri.v3) / 3.f;
-
 	glm::vec3 lightPos{0.f, 10.f, 0.f};
 	glm::vec3 lightDir = glm::normalize(avgPos - lightPos);
-	
-	float nDotL = glm::dot(lightDir, worldSpaceTri.GetSurfaceNormal());
-	if (nDotL < 0.0f)
-	{
-		index = static_cast<int>(-nDotL * 9.f) + 1;
-	}
-	else
-	{
-		// only ambient lighting
-		index = 1;
-	}
+	glm::vec3 camToTri = glm::normalize(Camera::Main->GetTransform()->GetPosition() - avgPos);
+	glm::vec3 bounce = glm::reflect(camToTri, worldSpaceTri.GetSurfaceNormal());
+	float nDotL = glm::dot(lightDir, bounce);
+	index = static_cast<int>(-nDotL * 9.f) + 1;
+	//if (nDotL < 0.0f)
+	//{
+	//	index = static_cast<int>(-nDotL * 9.f) + 1;
+	//}
+	//else
+	//{
+	//	// only ambient lighting
+	//	index = 1;
+	//}
 
-	assert(index >= 0 && index <= 10 && "index must be in the range of 0-10");
+	if (index < 0)
+		index = 0;
+
+	glm::vec4 pos1 = _screenSpaceTri.v1;
+	glm::vec4 pos2 = _screenSpaceTri.v2;
+	glm::vec4 pos3 = _screenSpaceTri.v3;
 
 	// Calculate lines and triangle direction
 	OrderPointsByYThenX(pos2, pos1);
@@ -444,24 +298,6 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	std::vector<glm::vec3> topSmallSide = PlotLine(pos2, pos1);
 	std::vector<glm::vec3> bottomSmallSide = PlotLine(pos2, pos3);
 	std::vector<glm::vec3> longSide = PlotLine(pos1, pos3);
-
-	// Wireframe view
-	//std::vector<std::vector<glm::vec3>> lines = { topSmallSide, bottomSmallSide, longSide };
-	//for each(std::vector<glm::vec3> line in lines)
-	//{
-	//	for each(glm::vec3 point in line)
-	//	{
-	//		if (point.x < 0 || point.x > Width - 1 || point.y < 0 || point.y > Height - 1)
-	//			continue;
-	//
-	//		const int x = point.x;
-	//		const int y = point.y;
-	//		const int drawIndex = point.x + (point.y * Width);
-	//		const wchar_t c = CharacterMap[index];
-	//		currentImageData[drawIndex] = c;
-	//	}
-	//}
-	//return;
 
 	// Render the triangle
 	int longIndex = 0;
@@ -480,18 +316,18 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 			glm::vec3 start = topSmallSide[smallIndex];
 			glm::vec3 end = longSide[longIndex];
 			currentY = std::max(start.y, end.y);
-			int distance = fabsf(start.x - end.x);
+			float distance = fabsf(start.x - end.x);
 	
 			float startDepth = start.z;
 			float endDepth = end.z;
 			float difference = startDepth - endDepth;
 			float step = difference / longSide.size();
-			for (int x = 0; x <= distance; ++x)
+			for (float x = 0; x <= distance; ++x)
 			{
-				int drawX = start.x + (x * direction);
-				int drawY = end.y;
+				float drawX = start.x + (x * direction);
+				float drawY = end.y;
 
-				if (drawX < 0 || drawX > Width - 1 || drawY < 0 || drawY > Height - 1)
+				if (drawX < 0 || drawX > (Width - 1) || drawY < 0 || drawY > (Height - 1))
 					continue;
 
 				int drawIndex = drawX + (drawY * Width);
@@ -516,13 +352,13 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 	longIndex = longMiddleIndex + 1;
 	if (bottomSmallSide[0].y != bottomSmallSide[bottomSmallSide.size() - 1].y)
 	{
-		for (int smallIndex = 1; smallIndex < bottomSmallSide.size() && longIndex < longSide.size();)
+		for (int smallIndex = 0; smallIndex < bottomSmallSide.size() && longIndex < longSide.size();)
 		{
 			glm::vec3 start = bottomSmallSide[smallIndex];
 			glm::vec3 end = longSide[longIndex];
 			currentY = std::min(start.y, end.y);
 			float distance = std::fabsf(start.x - end.x);
-	
+		
 			float startDepth = start.z;
 			float endDepth = end.z;
 			float difference = startDepth - endDepth;
@@ -531,12 +367,12 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 			{
 				int drawX = start.x + (x * direction);
 				int drawY = end.y;
-
+		
 				if (drawX < 0 || drawX > Width - 1 || drawY < 0 || drawY > Height - 1)
 					continue;
-
+		
 				int drawIndex = drawX + (drawY * Width);
-
+		
 				float depth = startDepth - (step * x);
 				if (DepthData[drawIndex] > depth)
 				{
@@ -544,15 +380,65 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 					DepthData[drawIndex] = depth;
 				}
 			}
-	
+		
 			while (smallIndex < bottomSmallSide.size() - 1 && bottomSmallSide[smallIndex].y >= currentY)
 				++smallIndex;
-	
+		
 			float currentEndY = longSide[longIndex].y;
 			while (longIndex < longSide.size() && longSide[longIndex].y >= currentEndY)
 				++longIndex;
 		}
 	}
+}
+
+void ConsoleRenderer::DrawTriangleTopHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide)
+{
+	//wchar_t* currentImageData = GetCurrentScreenBuffer();
+	//
+	//float currentY = _shortSide[0].y;
+	//int longIndex = 0;
+	//
+	//for (int smallIndex = 0; smallIndex < _shortSide.size() && longIndex > 0;)
+	//	{
+	//		glm::vec3 start = _shortSide[smallIndex];
+	//		glm::vec3 end = _longSide[longIndex];
+	//
+	//		currentY = std::max(start.y, end.y);
+	//		float distance = fabsf(start.x - end.x);
+	//
+	//		float startDepth = start.z;
+	//		float endDepth = end.z;
+	//		float difference = startDepth - endDepth;
+	//		float step = difference / _longSide.size();
+	//		for (float x = 0; x <= distance; ++x)
+	//		{
+	//			float drawX = start.x + (x * direction);
+	//			float drawY = end.y;
+	//
+	//			if (drawX < 0 || drawX > (Width - 1) || drawY < 0 || drawY > (Height - 1))
+	//				continue;
+	//
+	//			int drawIndex = drawX + (drawY * Width);
+	//			
+	//			float depth = startDepth - (step * x);
+	//			if (DepthData[drawIndex] > depth)
+	//			{
+	//				currentImageData[drawIndex] = CharacterMap[index];
+	//				DepthData[drawIndex] = depth;
+	//			}
+	//		}
+	//
+	//		while (smallIndex < _shortSide.size() - 1 && _shortSide[smallIndex].y <= currentY)
+	//			++smallIndex;
+	//
+	//		while (longIndex > 0 && longSide[longIndex].y <= currentY)
+	//			--longIndex;
+	//	}
+}
+
+void ConsoleRenderer::DrawTriangleBottomHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide, const int _longSideMiddleIndex)
+{
+	
 }
 
 // http://members.chello.at/~easyfilter/bresenham.html
@@ -620,7 +506,7 @@ glm::mat4 ConsoleRenderer::GetMVP(TransformComponent* _transform) const
 
 	const glm::mat4 view = glm::inverse(Camera::GetCameraMatrix());
 	const glm::mat4 model = _transform->GetTransformation();
-	const glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float)Width / (float)Height, 0.1f, 1.f) *asciiStretchReduction;
+	const glm::mat4 projection = asciiStretchReduction * glm::perspective(glm::radians(FOV), AspectRatio, NearPlane, FarPlane);
 	const glm::mat4 mvp = projection * view * model;
 
 	return mvp;
@@ -635,9 +521,6 @@ glm::mat4 ConsoleRenderer::GetMV(TransformComponent* _transform) const
 	return mv;
 }
 
-static float _max = 0.f;
-static float _min = 0.f;
-
 Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform) const
 {
 	glm::mat4 MVP = GetMVP(_transform);
@@ -648,6 +531,14 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	
 	Tri transformedTri(pos1, pos2, pos3);
 	transformedTri.RecalculateSurfaceNormal();
+
+	// Backface culling
+	glm::vec3 avgPos = (pos1 + pos2 + pos3) / 3.f;
+	if (glm::dot(transformedTri.GetSurfaceNormal(), avgPos) >= 0.f)
+	{
+		transformedTri.Discard = true;
+		return transformedTri;
+	}
 
 	pos1.x /= pos1.w;
 	pos2.x /= pos2.w;
@@ -661,11 +552,9 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	pos2.z /= pos2.w;
 	pos3.z /= pos3.w;
 
-	float f = 1000.f;
-	float n = 0.1f;
-	pos1.z = (((f - n) * pos1.z) + n + f) / 2.f;
-	pos2.z = (((f - n) * pos2.z) + n + f) / 2.f;
-	pos3.z = (((f - n) * pos3.z) + n + f) / 2.f;
+	pos1.z = (((FarPlane - NearPlane) * pos1.z) + NearPlane + FarPlane) / 2.f;
+	pos2.z = (((FarPlane - NearPlane) * pos2.z) + NearPlane + FarPlane) / 2.f;
+	pos3.z = (((FarPlane - NearPlane) * pos3.z) + NearPlane + FarPlane) / 2.f;
 
 	transformedTri.v1.x = (pos1.x + 1.0f) * ((float)Width / 2);
 	transformedTri.v2.x = (pos2.x + 1.0f) * ((float)Width / 2);
@@ -674,6 +563,24 @@ Tri ConsoleRenderer::TriangleToScreenSpace(const Tri& _tri, TransformComponent* 
 	transformedTri.v1.y = (pos1.y + 1.0f) * ((float)Height / 2);
 	transformedTri.v2.y = (pos2.y + 1.0f) * ((float)Height / 2);
 	transformedTri.v3.y = (pos3.y + 1.0f) * ((float)Height / 2);
+
+	// Frustum culling
+	auto OutsideFrustum = [this](const Tri& _tri) -> bool
+	{
+		auto ClipVec3 = [this](const glm::vec4& _vec) -> bool
+		{
+			return  (_vec.x < 0) || (_vec.x > (float)Width) ||
+					(_vec.y < 0) || (_vec.y > (float)Height) ||
+					(_vec.z < NearPlane) || (_vec.z > FarPlane);			
+		};
+	
+		return ClipVec3(_tri.v1) && ClipVec3(_tri.v2) && ClipVec3(_tri.v3);
+	};
+	
+	if (OutsideFrustum(transformedTri))
+	{
+		transformedTri.Discard = true;
+	}
 
 	return transformedTri;
 }

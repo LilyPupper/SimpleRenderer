@@ -23,30 +23,10 @@ Application::Application(const int& _width, const int& _height)
 		tc->SetPosition(0.f, 0.f, 3.f);
 		tc->SetRotation({0.0f, 0.0f, 0.0f});
 	}
-
-	//float range = 15.f;
-	//float step = 15.f;
-	//for (float x = -range; x <= range; x += step)
-	//{
-	//	for (float y = -range; y <= range; y += step)
-	//	{
-	//		for (float z = -range; z <= range; z += step)
-	//		{
-	//			RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
-	//			if (TransformComponent* t1 = rm1->GetTransform())
-	//			{
-	//				t1->SetScale(5.f);
-	//				t1->SetPosition(x + y, y, z);
-	//				t1->SetRotation(glm::vec3(0.f, 0.f, 0.f));
-	//			}
-	//		}
-	//	}
-	//}
-
 	RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
 	if (TransformComponent* t1 = rm1->GetTransform())
 	{
-		t1->SetScale(1.f);
+		t1->SetScale(5.f);
 		t1->SetPosition(0.f, 0.0f, 0.0f);
 		t1->SetRotation(glm::vec3(0.f, 0.f, 180.f));
 	}
@@ -56,7 +36,7 @@ Application::Application(const int& _width, const int& _height)
 	//{
 	//	t2->SetScale(1.f);
 	//	t2->SetPosition(5.f, 0.0f, 0.0f);
-	//	t2->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	//	t2->SetRotation(glm::vec3(90.f, 0.f, 0.f));
 	//}
 }
 
