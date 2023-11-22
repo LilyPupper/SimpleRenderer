@@ -18,6 +18,9 @@ Application::Application(const int& _width, const int& _height)
 	, m_CursorLocked(false)
 {
 	Camera* cam = m_ObjectFactory->NewObject<Camera>();
+	cam->PixelWidth = _width;
+	cam->PixelHeight = _height;
+	cam->ViewportX = 0;
 	if (TransformComponent* tc = cam->GetTransform())
 	{
 		tc->SetPosition(0.f, 0.f, 5.f);

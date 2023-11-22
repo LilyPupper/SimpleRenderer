@@ -14,13 +14,9 @@ class TransformComponent;
 class RendererBase
 {
 protected:
-	RendererBase(const unsigned int _width, const unsigned int _height, const float _FOV = 60.f, const float _nearPlane = 0.1f, const float _farPlane = 1000.f)
+	RendererBase(const unsigned int _width, const unsigned int _height)
 		: Width(_width)
 		, Height(_height)
-		, FOV(_FOV)
-		, AspectRatio((float)_width/(float)_height)
-		, NearPlane(_nearPlane)
-		, FarPlane(_farPlane)
 	{}
 
 public:
@@ -65,9 +61,6 @@ protected:
 	HWND WindowHandle;
 
 	int Width, Height;
-	float FOV;
-	float AspectRatio;
-	float NearPlane, FarPlane;
 
 	std::vector<std::pair<const char*, TransformComponent* const>> ObjectsToRender;
 

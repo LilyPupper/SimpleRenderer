@@ -26,21 +26,15 @@ public:
 	bool InitialiseConsoleWindow();
 
 	virtual void Render(const float& _deltaTime) override;
-
 	void PushToScreen(const float& _deltaTime);
-
 	void RasterizeTri(const Tri& _tri, TransformComponent* const _transform);
 	void DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform);
-	
-	void OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low);
+
+	wchar_t LightIntensityToAsciiCharacter(const float _lightIntensity) const;
 
 	inline void WriteToScreen(int _row, int _col, wchar_t _char)
 	{
 		GetCurrentScreenBuffer()[_row * Width + _col] = _char;
-	}
-	inline void WriteToScreen(int _row, int _col, const std::wstring& _s)
-	{
-		swprintf(&GetCurrentScreenBuffer()[_row * Width + _col], _s.size() + 1, L"%s", _s.c_str());
 	}
 
 	void NextScreenBuffer()
@@ -84,9 +78,6 @@ protected:
 	std::atomic_bool bIsScreenBufferReady;
 	std::atomic_bool bRenderThreadContinue;
 
-private:
-	glm::mat4 GetMVP(TransformComponent* _transform) const;
-	glm::mat4 GetMV(TransformComponent* _transform) const;
-	Tri TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform) const;
-	Tri TriangleToWorldSpace(const Tri& _tri, TransformComponent* _transform) const;
+	const int CharacterMapLength = 10;
+	const wchar_t* CharacterMap = L" .:-=+*8#%@";
 };
