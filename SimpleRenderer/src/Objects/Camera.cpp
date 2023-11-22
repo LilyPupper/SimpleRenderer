@@ -19,7 +19,7 @@ Camera::Camera(const int _pixelWidth /*= 0*/, const int _pixelHeight /*= 0*/, co
 {
 	if (Main)
 	{
-		assert("Too many cameras!" & 1);
+		assert("Too many cameras!" && 1);
 	}
 
 	Main = this;
