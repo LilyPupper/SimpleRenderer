@@ -294,188 +294,83 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _scr
 	OrderPointsByYThenX(pos3, pos2);
 	OrderPointsByYThenX(pos2, pos1);
 
-	int direction = (pos2.y - pos1.y) * (pos3.x - pos1.x) < (pos2.x - pos1.x) * (pos3.y - pos1.y) ? 1 : -1;
+	if (pos1.y == pos3.y)
+		return;
 
-	std::vector<glm::vec3> topSmallSide = PlotLine(pos2, pos1);
-	std::vector<glm::vec3> bottomSmallSide = PlotLine(pos2, pos3);
-	std::vector<glm::vec3> longSide = PlotLine(pos1, pos3);
-
-	// Render the triangle
-	int longIndex = 0;
-	float currentY = topSmallSide[0].y;
-
-	// Get the middle index of the long side
-	while (longIndex < longSide.size() - 1 && currentY != longSide[longIndex].y)
-		++longIndex;
-	int longMiddleIndex = longIndex;
-
-	// Rasterize top half of triangle
-	if (topSmallSide[0].y != topSmallSide[topSmallSide.size() - 1].y) // If these points are equal dont draw this half of the triangle
+	auto GetSlopePoint = [](const glm::vec3& start, const glm::vec3& end, const int y) -> glm::vec3
 	{
-		for (int smallIndex = 0; smallIndex < topSmallSide.size() && longIndex > 0;)
+		float lowerX = start.x > end.x ? end.x : start.x;
+		float higherX = start.x > end.x ? start.x : end.x;
+		float lowerZ = start.z > end.z ? end.z : start.z;
+		float higherZ = start.z > end.z ? start.z : end.z;
+		float x = std::clamp(start.x + (end.x - start.x) * (y - start.y) / (end.y - start.y), lowerX, higherX);
+		float z = std::clamp(start.z + (end.z - start.z) * (y - start.y) / (end.y - start.y), lowerZ, higherZ);
+		return glm::vec3(x, y, z);
+	};
+
+	const int maxCapacity = std::floor(pos1.y) - std::floor(pos3.y) + 1;
+	std::vector<std::pair<glm::vec3, glm::vec3>> scanlines(maxCapacity);
+
+	bool facingLeft = pos2.x > pos3.x;
+
+	// Get scanlines for top half of triangle
+	if (std::floor(pos1.y) != std::floor(pos2.y))
+	{
+		for (float y = pos1.y; y >= pos2.y; --y)
 		{
-			glm::vec3 start = topSmallSide[smallIndex];
-			glm::vec3 end = longSide[longIndex];
-			currentY = std::max(start.y, end.y);
-			float distance = fabsf(start.x - end.x);
-	
-			float startDepth = start.z;
-			float endDepth = end.z;
-			float difference = startDepth - endDepth;
-			float step = difference / longSide.size();
-			for (float x = 0; x <= distance; ++x)
-			{
-				float drawX = start.x + (x * direction);
-				float drawY = end.y;
+			glm::vec3 start = GetSlopePoint(pos2, pos1, std::floor(y));
+			glm::vec3 end = GetSlopePoint(pos3, pos1, std::floor(y));
 
-				if (drawX < 0 || drawX > (Width - 1) || drawY < 0 || drawY > (Height - 1))
-					continue;
+			if (start.x < end.x)
+				std::swap(start, end);
 
-				int drawIndex = drawX + (drawY * Width);
-				
-				float depth = startDepth - (step * x);
-				if (DepthData[drawIndex] > depth)
-				{
-					currentImageData[drawIndex] = CharacterMap[index];
-					DepthData[drawIndex] = depth;
-				}
-			}
-	
-			while (smallIndex < topSmallSide.size() - 1 && topSmallSide[smallIndex].y <= currentY)
-				++smallIndex;
-	
-			while (longIndex > 0 && longSide[longIndex].y <= currentY)
-				--longIndex;
+			scanlines.emplace_back(std::make_pair(std::move(start), std::move(end)));
 		}
 	}
-
-	// Rasterize bottom half of triangle
-	longIndex = longMiddleIndex + 1;
-	if (bottomSmallSide[0].y != bottomSmallSide[bottomSmallSide.size() - 1].y)
+	
+	// Get scanlines for bottom half of triangle
+	if (std::floor(pos2.y) != std::floor(pos3.y))
 	{
-		for (int smallIndex = 0; smallIndex < bottomSmallSide.size() && longIndex < longSide.size();)
+		for (float y = pos2.y; y >= pos3.y; --y)
 		{
-			glm::vec3 start = bottomSmallSide[smallIndex];
-			glm::vec3 end = longSide[longIndex];
-			currentY = std::min(start.y, end.y);
-			float distance = std::fabsf(start.x - end.x);
-		
-			float startDepth = start.z;
-			float endDepth = end.z;
-			float difference = startDepth - endDepth;
-			float step = difference / longSide.size();
-			for (int x = 0; x <= distance; ++x)
-			{
-				int drawX = start.x + (x * direction);
-				int drawY = end.y;
-		
-				if (drawX < 0 || drawX > Width - 1 || drawY < 0 || drawY > Height - 1)
-					continue;
-		
-				int drawIndex = drawX + (drawY * Width);
-		
-				float depth = startDepth - (step * x);
-				if (DepthData[drawIndex] > depth)
-				{
-					currentImageData[drawIndex] = CharacterMap[index];
-					DepthData[drawIndex] = depth;
-				}
-			}
-		
-			while (smallIndex < bottomSmallSide.size() - 1 && bottomSmallSide[smallIndex].y >= currentY)
-				++smallIndex;
-		
-			float currentEndY = longSide[longIndex].y;
-			while (longIndex < longSide.size() && longSide[longIndex].y >= currentEndY)
-				++longIndex;
+			glm::vec3 start = GetSlopePoint(pos3, pos2, std::floor(y));
+			glm::vec3 end = GetSlopePoint(pos3, pos1,std::floor(y));
+
+			if (start.x < end.x)
+				std::swap(start, end);
+
+			scanlines.emplace_back(std::make_pair(std::move(start), std::move(end)));
 		}
 	}
-}
-
-void ConsoleRenderer::DrawTriangleTopHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide)
-{
-	//wchar_t* currentImageData = GetCurrentScreenBuffer();
-	//
-	//float currentY = _shortSide[0].y;
-	//int longIndex = 0;
-	//
-	//for (int smallIndex = 0; smallIndex < _shortSide.size() && longIndex > 0;)
-	//	{
-	//		glm::vec3 start = _shortSide[smallIndex];
-	//		glm::vec3 end = _longSide[longIndex];
-	//
-	//		currentY = std::max(start.y, end.y);
-	//		float distance = fabsf(start.x - end.x);
-	//
-	//		float startDepth = start.z;
-	//		float endDepth = end.z;
-	//		float difference = startDepth - endDepth;
-	//		float step = difference / _longSide.size();
-	//		for (float x = 0; x <= distance; ++x)
-	//		{
-	//			float drawX = start.x + (x * direction);
-	//			float drawY = end.y;
-	//
-	//			if (drawX < 0 || drawX > (Width - 1) || drawY < 0 || drawY > (Height - 1))
-	//				continue;
-	//
-	//			int drawIndex = drawX + (drawY * Width);
-	//			
-	//			float depth = startDepth - (step * x);
-	//			if (DepthData[drawIndex] > depth)
-	//			{
-	//				currentImageData[drawIndex] = CharacterMap[index];
-	//				DepthData[drawIndex] = depth;
-	//			}
-	//		}
-	//
-	//		while (smallIndex < _shortSide.size() - 1 && _shortSide[smallIndex].y <= currentY)
-	//			++smallIndex;
-	//
-	//		while (longIndex > 0 && longSide[longIndex].y <= currentY)
-	//			--longIndex;
-	//	}
-}
-
-void ConsoleRenderer::DrawTriangleBottomHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide, const int _longSideMiddleIndex)
-{
 	
-}
-
-// http://members.chello.at/~easyfilter/bresenham.html
-std::vector<glm::vec3> ConsoleRenderer::PlotLine(const glm::vec3& _p0, const glm::vec3& _p1)
-{
-	int x0 = (int)std::roundf(_p0.x);
-	int y0 = (int)std::roundf(_p0.y);
-	int x1 = (int)std::roundf(_p1.x);
-	int y1 = (int)std::roundf(_p1.y);
-
-	int dx = (int)abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-	int dy = -(int)abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-	int err = dx + dy, e2; /* error value e_xy */
-
-	std::vector<glm::vec3> points;
-
-	for (; ; )
-	{  /* loop */
-		glm::vec3 point = glm::vec3(x0, y0, 0.0f);
-		points.push_back(point);
-
-		if (x0 == x1 && y0 == y1) break;
-		e2 = 2 * err;
-		if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
-		if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
-	}
-
-	// Estimate depth between start and end point
-	const float difference = _p0.z - _p1.z;
-	const float step = difference / static_cast<float>(points.size());
-	for (unsigned int i = 0; i < points.size(); ++i)
+	// Draw scanlines
+	for (std::pair<glm::vec3, glm::vec3> scanline : scanlines)
 	{
-		points[i].z = _p0.z - (step * static_cast<float>(i));
-	}
+		float distance = std::floor(scanline.first.x) - std::floor(scanline.second.x);
 
-	return points;
+		float startDepth = scanline.first.z;
+		float endDepth = scanline.second.z;
+		float depthStep = (startDepth - endDepth) / distance;
+
+		int stepCount = 0;
+		for (float i = scanline.first.x; i >= scanline.first.x - distance; i -= 1.f)
+		{
+			int x = std::floor(i);
+			int y = std::floor(scanline.first.y);
+
+			if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1)
+				continue;
+	
+			int drawIndex = x + (y * Width);
+			float z = scanline.first.z + (depthStep * stepCount);
+			if (DepthData[drawIndex] > z)
+			{
+				currentImageData[drawIndex] = CharacterMap[index];
+				DepthData[drawIndex] = z;
+			}
+			stepCount++;
+		}
+	}
 }
 
 void ConsoleRenderer::OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low)

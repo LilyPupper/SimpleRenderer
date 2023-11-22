@@ -15,9 +15,9 @@ void RotatingModel::Update(const float& _deltaTime)
 {
 	Object::Update(_deltaTime);
 
-	float angleXIncrease = 1.5f;
-	float angleYIncrease = 0.75f;
-	float angleZIncrease = 0.375f;
+	float angleXIncrease = 0.f;
+	float angleYIncrease = 0.f;
+	float angleZIncrease = 1.f;
 
 	m_Time += _deltaTime;
 
@@ -28,7 +28,8 @@ void RotatingModel::Update(const float& _deltaTime)
 		const glm::vec3 euler1 = t->GetRotation();
 		
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
-		
+
+		//t->Rotate(_deltaTime * 25.f, t->GetForward());
 		//t->SetRotation(r * m_Time * 15.f);
 	}
 }

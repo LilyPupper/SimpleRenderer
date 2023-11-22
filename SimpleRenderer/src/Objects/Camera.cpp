@@ -29,7 +29,7 @@ void Camera::Update(const float& _deltaTime)
 	{
 		return;
 	}
-
+	//return;
 	// Move
 	const float moveSpeed = 10.f * _deltaTime;
 	if (GetKeyState('W') & 0x8000)

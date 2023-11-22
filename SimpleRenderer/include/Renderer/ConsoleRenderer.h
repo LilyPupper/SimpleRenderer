@@ -31,11 +31,7 @@ public:
 
 	void RasterizeTri(const Tri& _tri, TransformComponent* const _transform);
 	void DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform);
-
-	void DrawTriangleTopHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide);
-	void DrawTriangleBottomHalf(const std::vector<glm::vec3>& _longSide, const std::vector<glm::vec3>& _shortSide, const int _longSideMiddleIndex);
-
-	std::vector<glm::vec3> PlotLine(const glm::vec3& _p0, const glm::vec3& _p1);
+	
 	void OrderPointsByYThenX(glm::vec4& _high, glm::vec4& _low);
 
 	inline void WriteToScreen(int _row, int _col, wchar_t _char)
