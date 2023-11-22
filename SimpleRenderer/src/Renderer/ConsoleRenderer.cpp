@@ -255,6 +255,7 @@ void Barycentric(const glm::vec3& p, const glm::vec3& a, const glm::vec3& b, con
 	u = 1.f -v - w;
 }
 
+// https://youtu.be/PahbNFypubE?si=WROMBcqVb14EpsfC
 void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform)
 {
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
@@ -271,18 +272,18 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _scr
 	glm::vec3 bounce = glm::reflect(camToTri, worldSpaceTri.GetSurfaceNormal());
 	float nDotL = glm::dot(lightDir, bounce);
 	index = static_cast<int>(-nDotL * 9.f) + 1;
-	//if (nDotL < 0.0f)
-	//{
-	//	index = static_cast<int>(-nDotL * 9.f) + 1;
-	//}
-	//else
-	//{
-	//	// only ambient lighting
-	//	index = 1;
-	//}
+	if (nDotL < 0.0f)
+	{
+		index = static_cast<int>(-nDotL * 9.f) + 1;
+	}
+	else
+	{
+		// only ambient lighting
+		index = 1;
+	}
 
-	if (index < 0)
-		index = 0;
+	//if (index < 0)
+	//	index = 0;
 
 	glm::vec4 pos1 = _screenSpaceTri.v1;
 	glm::vec4 pos2 = _screenSpaceTri.v2;
