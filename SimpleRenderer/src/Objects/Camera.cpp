@@ -138,7 +138,7 @@ glm::mat4 Camera::GetMVPMatrix(TransformComponent* _transform)
 	return mvp;
 }
 
-glm::mat4 Camera::GetMV(TransformComponent* _transform)
+glm::mat4 Camera::GetMVMatrix(TransformComponent* _transform)
 {
 	const glm::mat4 view = GetViewMatrix();
 	const glm::mat4 model = _transform->GetTransformation();
@@ -149,46 +149,45 @@ glm::mat4 Camera::GetMV(TransformComponent* _transform)
 Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform)
 {
 	glm::mat4 MVP = GetMVPMatrix(_transform);
-
-	glm::vec4 pos1 = MVP * _tri.v1;
-	glm::vec4 pos2 = MVP * _tri.v2;
-	glm::vec4 pos3 = MVP * _tri.v3;
+	Vertex vert1(MVP * _tri.v1.Position, _tri.v1.Normal);
+	Vertex vert2(MVP * _tri.v2.Position, _tri.v2.Normal);
+	Vertex vert3(MVP * _tri.v3.Position, _tri.v3.Normal);
 	
-	Tri transformedTri(pos1, pos2, pos3);
+	Tri transformedTri(vert1, vert2, vert3);
 	transformedTri.RecalculateSurfaceNormal();
 
 	// Backface culling
 	// as we're in clip space, avgPos is a direction vector from the camera to the centre of the tri
-	glm::vec3 avgPos = (pos1 + pos2 + pos3) / 3.f;
-	if (glm::dot(transformedTri.GetSurfaceNormal(), avgPos) >= 0.f)
+	glm::vec3 avgPos = (vert1.Position + vert2.Position + vert3.Position) / 3.f;
+	if (glm::dot(glm::vec3(transformedTri.GetSurfaceNormal()), avgPos) >= 0.f)
 	{
 		transformedTri.Discard = true;
 		return transformedTri;
 	}
 
-	pos1.x /= pos1.w;
-	pos2.x /= pos2.w;
-	pos3.x /= pos3.w;
-	
-	pos1.y /= pos1.w;
-	pos2.y /= pos2.w;
-	pos3.y /= pos3.w;
-	
-	pos1.z /= pos1.w;
-	pos2.z /= pos2.w;
-	pos3.z /= pos3.w;
+	vert1.Position.x /= vert1.Position.w;
+	vert2.Position.x /= vert2.Position.w;
+	vert3.Position.x /= vert3.Position.w;
 
-	pos1.z = (((FarPlane - NearPlane) * pos1.z) + NearPlane + FarPlane) / 2.f;
-	pos2.z = (((FarPlane - NearPlane) * pos2.z) + NearPlane + FarPlane) / 2.f;
-	pos3.z = (((FarPlane - NearPlane) * pos3.z) + NearPlane + FarPlane) / 2.f;
+	vert1.Position.y /= vert1.Position.w;
+	vert2.Position.y /= vert2.Position.w;
+	vert3.Position.y /= vert3.Position.w;
 
-	transformedTri.v1.x = ((pos1.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
-	transformedTri.v2.x = ((pos2.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
-	transformedTri.v3.x = ((pos3.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
-	
-	transformedTri.v1.y = ((pos1.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
-	transformedTri.v2.y = ((pos2.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
-	transformedTri.v3.y = ((pos3.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
+	vert1.Position.z /= vert1.Position.w;
+	vert2.Position.z /= vert2.Position.w;
+	vert3.Position.z /= vert3.Position.w;
+
+	vert1.Position.z = (((FarPlane - NearPlane) * vert1.Position.z) + NearPlane + FarPlane) / 2.f;
+	vert2.Position.z = (((FarPlane - NearPlane) * vert2.Position.z) + NearPlane + FarPlane) / 2.f;
+	vert3.Position.z = (((FarPlane - NearPlane) * vert3.Position.z) + NearPlane + FarPlane) / 2.f;
+
+	transformedTri.v1.Position.x = ((vert1.Position.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
+	transformedTri.v2.Position.x = ((vert2.Position.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
+	transformedTri.v3.Position.x = ((vert3.Position.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
+
+	transformedTri.v1.Position.y = ((vert1.Position.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
+	transformedTri.v2.Position.y = ((vert2.Position.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
+	transformedTri.v3.Position.y = ((vert3.Position.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
 						  
 	// Frustum culling
 	auto OutsideFrustum = [this](const Tri& _tri) -> bool
@@ -200,7 +199,7 @@ Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transfor
 					(_vec.z < NearPlane) || (_vec.z > FarPlane);			
 		};
 	
-		return ClipVec3(_tri.v1) && ClipVec3(_tri.v2) && ClipVec3(_tri.v3);
+		return ClipVec3(_tri.v1.Position) && ClipVec3(_tri.v2.Position) && ClipVec3(_tri.v3.Position);
 	};
 	
 	if (OutsideFrustum(transformedTri))

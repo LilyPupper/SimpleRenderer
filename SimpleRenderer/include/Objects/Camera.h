@@ -22,7 +22,7 @@ public:
 	glm::mat4 GetProjectionMatrix() const;
 	glm::mat4 GetMVPMatrix(TransformComponent* _transform);
 	// Get Model View matrix
-	glm::mat4 GetMV(TransformComponent* _transform);
+	glm::mat4 GetMVMatrix(TransformComponent* _transform);
 
 	Tri TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform);
 

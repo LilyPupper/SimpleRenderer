@@ -35,7 +35,7 @@ namespace TransformComponentTests
 		constexpr float a = 1.5f;
 		constexpr float b = 150.f;
 		transform.SetScale(a);
-		transform.Scale(b);
+		transform.ScaleBy(b);
 		EXPECT_EQ(transform.GetScale().x, a * b);
 		EXPECT_EQ(transform.GetScale().y, a * b);
 		EXPECT_EQ(transform.GetScale().z, a * b);
@@ -43,7 +43,7 @@ namespace TransformComponentTests
 		constexpr float c = 2123.123456f;
 		constexpr float d = c * 1.654321f;
 		transform.SetScale(a);
-		transform.Scale(b, c, d);
+		transform.ScaleBy(b, c, d);
 		EXPECT_EQ(transform.GetScale().x, a * b);
 		EXPECT_EQ(transform.GetScale().y, a * c);
 		EXPECT_EQ(transform.GetScale().z, a * d);

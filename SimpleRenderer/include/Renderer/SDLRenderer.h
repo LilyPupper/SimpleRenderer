@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Tri.h"
 #include "Renderer/RendererBase.h"
 
 #include "SDL3/SDL.h"
@@ -11,6 +12,9 @@ public:
 	virtual ~SDLRenderer();
 
 	virtual void Render(const float& _deltaTime);
+
+	void RasterizeTri(const Tri& _tri, TransformComponent* const _transform);
+	void DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSpaceTri, TransformComponent* const _transform);
 
 protected:
 	SDL_Event Event;

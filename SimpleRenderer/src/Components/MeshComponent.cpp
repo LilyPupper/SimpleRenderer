@@ -7,7 +7,7 @@ MeshComponent::MeshComponent(Object* _owner, RendererBase* _renderer, const char
 	, bVisible(true)
 	, _Renderer(_renderer)
 {
-	m_Type = MESH;
+	Type = MESH;
 
 	if (_Renderer)
 	{

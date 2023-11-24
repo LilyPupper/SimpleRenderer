@@ -12,56 +12,56 @@ PixelData::~PixelData()
 {}
 
 CharTexture_Accessor::CharTexture_Accessor(const CharTexture* _owner)
-	: m_Owner(_owner), m_Texture(nullptr)
+	: Owner(_owner), Texture(nullptr)
 {}
 
 PixelData& CharTexture_Accessor::operator[](const unsigned int& _index)
 {
-	assert(_index < m_Owner->m_Height && "_index out of range!");
+	assert(_index < Owner->Height && "_index out of range!");
 
-	return *(reinterpret_cast<PixelData*>(this->m_Texture) + (_index * m_Owner->m_Width));
+	return *(reinterpret_cast<PixelData*>(this->Texture) + (_index * Owner->Width));
 }
 
 //////////////////////////////////////////////////
 
 CharTexture::CharTexture(const unsigned int& _width, const unsigned int& _height)
-	: m_Width(_width), m_Height(_height), m_Length(_width * _height), m_Accessor(this)
+	: Width(_width), Height(_height), Length(_width * _height), Accessor(this)
 {
-	m_Texture = new PixelData[m_Length];
+	Texture = new PixelData[Length];
 	Clear();
 }
 
 CharTexture::~CharTexture()
 {
-	delete[] m_Texture;
+	delete[] Texture;
 }
 
 void CharTexture::SetData(wchar_t* const _data)
 {
-	for (unsigned int y = 0; y < m_Height; ++y)
+	for (unsigned int y = 0; y < Height; ++y)
 	{
-		for (unsigned int x = 0; x < m_Width; ++x)
+		for (unsigned int x = 0; x < Width; ++x)
 		{
-			unsigned int index = x + y * m_Width;
-			m_Texture[index].Data = _data[index];
+			unsigned int index = x + y * Width;
+			Texture[index].Data = _data[index];
 		}
 	}
 }
 
 void CharTexture::Clear()
 {
-	for (unsigned int i = 0; i < m_Length; ++i)
+	for (unsigned int i = 0; i < Length; ++i)
 	{
-		m_Texture[i].Data = 0;
-		m_Texture[i].Depth = std::numeric_limits<float>::max();
+		Texture[i].Data = 0;
+		Texture[i].Depth = std::numeric_limits<float>::max();
 	}
 }
 
 void CharTexture::Debug()
 {
-	for (unsigned int i = 0; i < m_Height; ++i)
+	for (unsigned int i = 0; i < Height; ++i)
 	{
-		for (unsigned int j = 0; j < m_Width; ++j)
+		for (unsigned int j = 0; j < Width; ++j)
 		{
 			std::cout << (*this)[j][i].Data << ", ";
 		}
@@ -71,8 +71,8 @@ void CharTexture::Debug()
 
 CharTexture_Accessor& CharTexture::operator[](const unsigned int& _index)
 {
-	assert(_index < m_Width && "_index out of range!");
+	assert(_index < Width && "_index out of range!");
 
-	m_Accessor.m_Texture = m_Texture + _index;
-	return m_Accessor;
+	Accessor.Texture = Texture + _index;
+	return Accessor;
 }

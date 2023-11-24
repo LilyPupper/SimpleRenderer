@@ -19,8 +19,8 @@ private:
 	CharTexture_Accessor(const CharTexture* _owner);
 	~CharTexture_Accessor() = default;
 
-	PixelData* m_Texture;
-	const CharTexture* m_Owner;
+	PixelData* Texture;
+	const CharTexture* Owner;
 
 public:
 	PixelData& operator[](const unsigned int& _index);
@@ -35,8 +35,8 @@ public:
 	CharTexture(const unsigned int& _width, const unsigned int& _height);
 	virtual ~CharTexture();
 
-	inline unsigned int GetWidth() { return m_Width; }
-	inline unsigned int GetHeight() { return m_Height; }
+	inline unsigned int GetWidth() { return Width; }
+	inline unsigned int GetHeight() { return Height; }
 
 	void SetData(wchar_t* const _data);
 
@@ -47,10 +47,10 @@ public:
 	CharTexture_Accessor& operator[](const unsigned int& _index);
 
 private:
-	unsigned int m_Width, m_Height;
-	unsigned int m_Length;
-	PixelData* m_Texture;
+	unsigned int Width, Height;
+	unsigned int Length;
+	PixelData* Texture;
 
-	CharTexture_Accessor m_Accessor;
+	CharTexture_Accessor Accessor;
 };
 

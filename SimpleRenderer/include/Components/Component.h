@@ -10,6 +10,8 @@ enum COMPONENT_TYPE
 	MESHRENDERER,
 };
 
+//////////////////////////////////////////////////
+
 class Component
 {
 public:
@@ -21,14 +23,14 @@ public:
 
 	COMPONENT_TYPE GetComponentType();
 	Object* GetOwner();
-	inline TransformComponent* GetTransform() { return m_Owner->GetTransform(); }
+	inline TransformComponent* GetTransform() { return Owner->GetTransform(); }
 
-	inline const bool& IsActive() { return m_Active; }
-	inline void SetActive(const bool& _active) { m_Active = _active; }
+	inline const bool& IsActive() { return Active; }
+	inline void SetActive(const bool& _active) { Active = _active; }
 
 protected:
-	COMPONENT_TYPE m_Type;
-	Object* m_Owner;
+	COMPONENT_TYPE Type;
+	Object* Owner;
 
-	bool m_Active = true;
+	bool Active = true;
 };

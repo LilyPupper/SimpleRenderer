@@ -19,10 +19,10 @@ public:
 	void ClipMouse();
 
 private:
-	std::vector<Object*> m_ObjectList;
-	RendererBase* m_Renderer;
-	ObjectFactory* m_ObjectFactory;
+	std::vector<Object*> ObjectList;
+	RendererBase* Renderer;
+	ObjectFactory* _ObjectFactory;
 
-	bool m_Running;
-	bool m_CursorLocked;
+	bool Running;
+	bool CursorLocked;
 };

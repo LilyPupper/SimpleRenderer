@@ -18,15 +18,15 @@ public:
 
 	void SetScale(const float& _scale);
 	void SetScale(const float& _x, const float& _y, const float& _z);
-	void Scale(const float& _scale);
-	void Scale(const float& _x, const float& _y, const float& _z);
+	void ScaleBy(const float& _scale);
+	void ScaleBy(const float& _x, const float& _y, const float& _z);
 
-	inline glm::vec3 GetScale() const { return m_Scale; }
+	inline glm::vec3 GetScale() const { return Scale; }
 
 	// Set rotation in degrees
 	void SetRotation(const glm::vec3& _eulerAngles);
 	glm::vec3 GetRotation(bool _degrees = true) const;
-	glm::quat GetQuaternion() const { return m_Rotation; }
+	glm::quat GetQuaternion() const { return Rotation; }
 
 	void Rotate(const float& _theta, const glm::vec3& _axis);
 	void RotateX(const float& _theta);
@@ -36,7 +36,7 @@ public:
 	void SetPosition(const glm::vec3& _pos);
 	void SetPosition(const float& _x, const float& _y, const float& _z);
 
-	inline glm::vec3 GetPosition() const { return m_Translation; }
+	inline glm::vec3 GetPosition() const { return Translation; }
 
 	void Translate(const glm::vec3& _translation);
 	void Translate(const float& _x, const float& _y, const float& _z);
@@ -53,15 +53,15 @@ public:
 	glm::mat4 GetTransformation();
 
 private:
-	glm::vec3 m_Translation;
-	glm::quat m_Rotation;
-	glm::vec3 m_Scale;
+	glm::vec3 Translation;
+	glm::quat Rotation;
+	glm::vec3 Scale;
 
-	glm::mat4 m_TranslationMatrix;
-	glm::mat4 m_RotationMatrix;
-	glm::mat4 m_ScaleMatrix;
+	glm::mat4 TranslationMatrix;
+	glm::mat4 RotationMatrix;
+	glm::mat4 ScaleMatrix;
 
-	glm::mat4 m_TransformationMatrix;
+	glm::mat4 TransformationMatrix;
 
-	bool m_RebuildMatrix;
+	bool RebuildTransformationMatrix;
 };

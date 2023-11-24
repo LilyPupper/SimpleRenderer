@@ -14,5 +14,5 @@ public:
 	virtual void Render();
 
 private:
-	float m_Time;
+	float Time;
 };

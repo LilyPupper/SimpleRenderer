@@ -1,7 +1,7 @@
 #include "Components/Component.h"
 
 Component::Component(Object* _owner)
-	: m_Owner(_owner)
+	: Owner(_owner)
 {}
 
 Component::~Component()
@@ -9,10 +9,10 @@ Component::~Component()
 
 COMPONENT_TYPE Component::GetComponentType()
 {
-	return m_Type;
+	return Type;
 }
 
 Object* Component::GetOwner()
 {
-	return m_Owner;
+	return Owner;
 }

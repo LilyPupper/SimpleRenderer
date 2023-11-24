@@ -10,8 +10,8 @@ namespace Physics
     bool IntersectRayTriangle(const glm::vec3& _origin, const glm::vec3& _dir, const Tri& _tri, float& _baryX, float& _baryY, float& distance)
     {
         // find vectors for two edges sharing vert0
-        glm::vec3 edge1 = (glm::vec3)_tri.v2 - (glm::vec3)_tri.v1;
-        glm::vec3 edge2 = (glm::vec3)_tri.v3 - (glm::vec3)_tri.v1;
+        glm::vec3 edge1 = glm::vec3(_tri.v2.Position) - glm::vec3(_tri.v1.Position);
+        glm::vec3 edge2 = glm::vec3(_tri.v3.Position) - glm::vec3(_tri.v1.Position);
 
         // begin calculating determinant - also used to calculate U parameter
         glm::vec3 p = glm::cross(_dir, edge2);
@@ -24,7 +24,7 @@ namespace Physics
         if (det > std::numeric_limits<float>::epsilon())
         {
             // calculate distance from vert0 to ray origin
-            glm::vec3 dist = _origin - (glm::vec3)_tri.v1;
+            glm::vec3 dist = _origin - glm::vec3(_tri.v1.Position);
 
             // calculate U parameter and test bounds
             _baryX = glm::dot(dist, p);
@@ -42,7 +42,7 @@ namespace Physics
         else if (det < -std::numeric_limits<float>::epsilon())
         {
             // calculate distance from vert0 to ray origin
-            glm::vec3 dist = _origin - (glm::vec3)_tri.v1;
+            glm::vec3 dist = _origin - (glm::vec3)_tri.v1.Position;
 
             // calculate U parameter and test bounds
             _baryX = glm::dot(dist, p);

@@ -28,7 +28,7 @@ public:
 	virtual void Render(const float& _deltaTime) override;
 	void PushToScreen(const float& _deltaTime);
 	void RasterizeTri(const Tri& _tri, TransformComponent* const _transform);
-	void DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform);
+	void DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSpaceTri, TransformComponent* const _transform);
 
 	wchar_t LightIntensityToAsciiCharacter(const float _lightIntensity) const;
 
@@ -67,7 +67,7 @@ protected:
 	wchar_t* ScreenBuffers[SCREEN_BUFFER_COUNT];
 
 	float* DepthData;
-	std::vector<unsigned int> ImageHorizontalIter, m_ImageVerticalIter;
+	std::vector<unsigned int> ImageHorizontalIter, ImageVerticalIter;
 
 	wchar_t* ConsoleBuffer;
 	HANDLE Console;
@@ -78,6 +78,6 @@ protected:
 	std::atomic_bool bIsScreenBufferReady;
 	std::atomic_bool bRenderThreadContinue;
 
-	const int CharacterMapLength = 10;
-	const wchar_t* CharacterMap = L" .:-=+*8#%@";
+	const int CharacterMapLength = 9;
+	const wchar_t* CharacterMap = L".:-=+*8#%@";
 };

@@ -3,8 +3,11 @@
 #include <math.h>
 #include "glm/glm.hpp"
 
-Tri::Tri(const glm::vec3& _v1, const glm::vec3& _v2, const glm::vec3& _v3)
-	: v1(glm::vec4(_v1, 1.0f)), v2(glm::vec4(_v2, 1.0f)), v3(glm::vec4(_v3, 1.0f)), m_SurfaceNormal(glm::vec4())
+Tri::Tri(const Vertex& _v1, const Vertex& _v2, const Vertex& _v3)
+	: v1(_v1)
+	, v2(_v2)
+	, v3(_v3)
+	, SurfaceNormal(glm::vec4())
 {}
 
 Tri::~Tri()
@@ -12,26 +15,26 @@ Tri::~Tri()
 
 void Tri::RecalculateSurfaceNormal()
 {
-	const glm::vec3 u = v3 - v1;
-	const glm::vec3 v = v2 - v1;
+	const glm::vec3 u = v3.Position - v1.Position;
+	const glm::vec3 v = v2.Position - v1.Position;
 
-	m_SurfaceNormal.x = (u.y * v.z) - (u.z * v.y);
-	m_SurfaceNormal.y = (u.z * v.x) - (u.x * v.z);
-	m_SurfaceNormal.z = (u.x * v.y) - (u.y * v.x);
+	SurfaceNormal.x = (u.y * v.z) - (u.z * v.y);
+	SurfaceNormal.y = (u.z * v.x) - (u.x * v.z);
+	SurfaceNormal.z = (u.x * v.y) - (u.y * v.x);
 
-	m_SurfaceNormal = glm::normalize(m_SurfaceNormal);
+	SurfaceNormal = glm::normalize(SurfaceNormal);
 }
 
 glm::vec3 Tri::GetSurfaceNormal() const
 {
-	return m_SurfaceNormal;
+	return SurfaceNormal;
 }
 
 Tri Tri::operator*(glm::mat4& _m) const
 {
-	glm::vec4 _v1 = _m * v1;
-	glm::vec4 _v2 = _m * v2;
-	glm::vec4 _v3 = _m * v3;
+	const Vertex _v1(_m * v1.Position, _m * glm::vec4(v1.Normal, 0.f));
+	const Vertex _v2(_m * v2.Position, _m * glm::vec4(v2.Normal, 0.f));
+	const Vertex _v3(_m * v3.Position, _m * glm::vec4(v3.Normal, 0.f));
 
 	Tri t = Tri(_v1, _v2, _v3);
 	return t;
@@ -39,9 +42,9 @@ Tri Tri::operator*(glm::mat4& _m) const
 
 Tri Tri::operator*(const glm::mat4& _m) const
 {
-	glm::vec4 _v1 = _m * v1;
-	glm::vec4 _v2 = _m * v2;
-	glm::vec4 _v3 = _m * v3;
+	const Vertex _v1(_m * v1.Position, _m * glm::vec4(v1.Normal, 0.f));
+	const Vertex _v2(_m * v2.Position, _m * glm::vec4(v2.Normal, 0.f));
+	const Vertex _v3(_m * v3.Position, _m * glm::vec4(v3.Normal, 0.f));
 
 	Tri t = Tri(_v1, _v2, _v3);
 	return t;
@@ -49,7 +52,11 @@ Tri Tri::operator*(const glm::mat4& _m) const
 
 void Tri::operator*=(const glm::mat4& _m)
 {
-	v1 = _m * v1;
-	v2 = _m * v2;
-	v3 = _m * v3;
+	v1.Position = _m * v1.Position;
+	v2.Position = _m * v2.Position;
+	v3.Position = _m * v3.Position;
+
+	v1.Normal = _m * glm::vec4(v1.Normal, 0.f);
+	v2.Normal = _m * glm::vec4(v2.Normal, 0.f);
+	v3.Normal = _m * glm::vec4(v3.Normal, 0.f);
 }

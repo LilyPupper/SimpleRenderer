@@ -32,11 +32,11 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	DepthData = new float[_width * _height];
 
 	ImageHorizontalIter.resize(_width);
-	m_ImageVerticalIter.resize(_height);
+	ImageVerticalIter.resize(_height);
 	for (unsigned int i = 0; i < _width; ++i)
 		ImageHorizontalIter[i] = i;
 	for (unsigned int i = 0; i < _height; ++i)
-		m_ImageVerticalIter[i] = i;
+		ImageVerticalIter[i] = i;
 
 	Futures.resize(std::thread::hardware_concurrency());
 
@@ -59,6 +59,18 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	});
 
 	InitialiseConsoleWindow();
+
+
+	float u, v, w;
+	glm::vec3 p {3.f, 3.f, 0.f};
+	glm::vec3 a {4.f ,1.f, 0.f};
+	glm::vec3 b {5.f, 3.f, 0.f};
+	glm::vec3 c {2.f, 4.f, 0.f};
+
+	Util::Barycentric(p, a, b, c, u, v, w);
+
+	p = (a * u) + (b * v) + (c * w);
+	p = glm::vec3();
 }
 
 ConsoleRenderer::~ConsoleRenderer()
@@ -185,14 +197,14 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 				TransformComponent* transform = ObjectsToRender[meshIndex].second;
 
 				std::vector<unsigned int> m_TriIter;
-				m_TriIter.resize(mesh->m_Triangles.size());
-				for (unsigned int i = 0; i < mesh->m_Triangles.size(); ++i)
+				m_TriIter.resize(mesh->Triangles.size());
+				for (unsigned int i = 0; i < mesh->Triangles.size(); ++i)
 					m_TriIter[i] = i;
 
 				std::for_each(std::execution::par, m_TriIter.begin(), m_TriIter.end(),
 					[this, mesh, transform](unsigned int triIndex)
 					{
-						RasterizeTri(mesh->m_Triangles[triIndex], transform);
+						RasterizeTri(mesh->Triangles[triIndex], transform);
 					});
 			});
 	}
@@ -204,9 +216,9 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 			Mesh* mesh = RegisteredModels[ObjectsToRender[meshIndex].first];
 			TransformComponent* transform = ObjectsToRender[meshIndex].second;
 		
-			for (unsigned int triIndex = 0; triIndex < mesh->m_Triangles.size(); ++triIndex)
+			for (unsigned int triIndex = 0; triIndex < mesh->Triangles.size(); ++triIndex)
 			{
-				RasterizeTri(mesh->m_Triangles[triIndex], transform);
+				RasterizeTri(mesh->Triangles[triIndex], transform);
 			}
 		}
 	}
@@ -218,6 +230,8 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 		bIsScreenBufferReady = true;
 		NextScreenBuffer();
 	}
+
+	Sleep(5);
 }
 
 void ConsoleRenderer::PushToScreen(const float& _deltaTime)
@@ -242,30 +256,31 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 }
 
 // https://youtu.be/PahbNFypubE?si=WROMBcqVb14EpsfC
-void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _screenSpaceTri, TransformComponent* const _transform)
+void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSpaceTri, TransformComponent* const _transform)
 {
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
 
-	// Calculate lighting
-	Tri worldSpaceTri = _worldTri * _transform->GetTransformation();
-	worldSpaceTri.RecalculateSurfaceNormal();
-	glm::vec3 avgPos = (worldSpaceTri.v1 + worldSpaceTri.v2 + worldSpaceTri.v3) / 3.f;
+	// Calculate lighting per tri
 	glm::vec3 lightPos{0.f, 10.f, 0.f};
-	glm::vec3 lightDir = glm::normalize(avgPos - lightPos);
-	glm::vec3 camToTri = glm::normalize(Camera::Main->GetTransform()->GetPosition() - avgPos);
-	glm::vec3 bounce = glm::reflect(camToTri, worldSpaceTri.GetSurfaceNormal());
-	float nDotL = glm::dot(lightDir, bounce);
+	Tri worldSpaceTri = _tri * _transform->GetTransformation();
+	worldSpaceTri.RecalculateSurfaceNormal();
 
-	const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(nDotL);
+	//glm::vec3 avgPos = (worldSpaceTri.v1.Position + worldSpaceTri.v2.Position + worldSpaceTri.v3.Position) / 3.f;
+	//glm::vec3 normal = worldSpaceTri.GetSurfaceNormal();
+	//glm::vec3 lightDir = glm::normalize(avgPos - lightPos);
+	//float lightIntensity = glm::dot(lightDir, normal);
+	//const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(lightIntensity);
 
-	glm::vec4 pos1 = _screenSpaceTri.v1;
-	glm::vec4 pos2 = _screenSpaceTri.v2;
-	glm::vec4 pos3 = _screenSpaceTri.v3;
+	Tri screenSpacePosition = _screenSpaceTri;
 
 	// Calculate lines and triangle direction
-	Util::OrderPointsByYThenX(pos2, pos1);
-	Util::OrderPointsByYThenX(pos3, pos2);
-	Util::OrderPointsByYThenX(pos2, pos1);
+	Util::OrderVerticesByYThenX(screenSpacePosition.v2, screenSpacePosition.v1);
+	Util::OrderVerticesByYThenX(screenSpacePosition.v3, screenSpacePosition.v2);
+	Util::OrderVerticesByYThenX(screenSpacePosition.v2, screenSpacePosition.v1);
+
+	glm::vec4& pos1 = screenSpacePosition.v1.Position;
+	glm::vec4& pos2 = screenSpacePosition.v2.Position;
+	glm::vec4& pos3 = screenSpacePosition.v3.Position;
 
 	// Early out if triangle has no area
 	if (pos1.y == pos3.y)
@@ -322,6 +337,11 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _scr
 	{
 		float distance = scanline.first.x - scanline.second.x;
 
+		if (distance == 0.f)
+		{
+			continue;
+		}
+
 		float startDepth = scanline.first.z;
 		float endDepth = scanline.second.z;
 
@@ -341,6 +361,25 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _worldTri, const Tri& _scr
 	
 			int drawIndex = x + (y * Width);
 			float z = scanline.first.z + (depthStep * stepCount);
+
+			float u, v, w;
+			glm::vec3 p {x, y, z};
+
+			glm::vec3 a = _screenSpaceTri.v1.Position;
+			glm::vec3 b = _screenSpaceTri.v2.Position;
+			glm::vec3 c = _screenSpaceTri.v3.Position;
+
+			Util::Barycentric(p, a, b, c, u, v, w);
+
+			glm::vec3 normal = glm::normalize((worldSpaceTri.v1.Normal * u) + (worldSpaceTri.v2.Normal * v) + (worldSpaceTri.v1.Normal * w));
+			glm::vec3 pixelPos = (_screenSpaceTri.v1.Position * u) + (_screenSpaceTri.v1.Position * v) + (_screenSpaceTri.v1.Position * w);
+
+			glm::vec3 lightPos {0.f, 10.f, 0.f};
+			glm::vec3 lightDir = glm::normalize(pixelPos - lightPos);
+
+			float lightIntensity = glm::dot (normal, lightDir);
+			const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(lightIntensity);
+
 			if (DepthData[drawIndex] > z)
 			{
 				currentImageData[drawIndex] = CharacterToDraw;
@@ -357,6 +396,8 @@ wchar_t ConsoleRenderer::LightIntensityToAsciiCharacter(const float _lightIntens
 
 	if (index < 0)
 		index = 0;
+	else if (index > CharacterMapLength)
+		index = CharacterMapLength;
 
 	return CharacterMap[index];
 }

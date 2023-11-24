@@ -3,18 +3,18 @@
 #include "Components/Component.h"
 #include "Components/TransformComponent.h"
 
-unsigned int Object::s_ObjectIDCount = 0;
-OBJECT_MAP Object::s_ObjectList;
+unsigned int Object::sObjectIDCount = 0;
+OBJECT_MAP Object::sObjectList;
 
 Object::Object()
-	: m_Transform(new TransformComponent(this))
+	: _Transform(new TransformComponent(this))
 {
-	m_ObjectID = s_ObjectIDCount;
-	++s_ObjectIDCount;
+	ObjectID = sObjectIDCount;
+	++sObjectIDCount;
 
-	s_ObjectList.insert(std::pair<const unsigned int, Object*>(m_ObjectID, this));
+	sObjectList.insert(std::pair<const unsigned int, Object*>(ObjectID, this));
 
-	AddComponent(m_Transform);
+	AddComponent(_Transform);
 }
 
 Object::~Object()
@@ -22,31 +22,31 @@ Object::~Object()
 
 void Object::Update(const float& _deltaTime)
 {
-	for (unsigned int i = 0; i < m_Components.size(); ++i)
+	for (unsigned int i = 0; i < Components.size(); ++i)
 	{
-		m_Components[i]->Update(_deltaTime);
+		Components[i]->Update(_deltaTime);
 	}
 }
 
 void Object::Render()
 {
-	for (unsigned int i = 0; i < m_Components.size(); ++i)
+	for (unsigned int i = 0; i < Components.size(); ++i)
 	{
-		m_Components[i]->Render();
+		Components[i]->Render();
 	}
 }
 
 void Object::AddComponent(Component* _component)
 {
-	m_Components.push_back(_component);
+	Components.push_back(_component);
 }
 
 Component* Object::FindComponentOfType(COMPONENT_TYPE _type)
 {
-	for (unsigned int i = 0; i < m_Components.size(); ++i)
+	for (unsigned int i = 0; i < Components.size(); ++i)
 	{
-		if (m_Components[i]->GetComponentType() == _type)
-			return m_Components[i];
+		if (Components[i]->GetComponentType() == _type)
+			return Components[i];
 	}
 	return nullptr;
 }
@@ -58,10 +58,10 @@ Component* Object::operator[](COMPONENT_TYPE _type)
 
 unsigned int Object::GetObjectID()
 {
-	return m_ObjectID;
+	return ObjectID;
 }
 
 OBJECT_MAP Object::GetObjectList()
 {
-	return s_ObjectList;
+	return sObjectList;
 }

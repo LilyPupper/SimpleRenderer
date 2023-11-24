@@ -12,12 +12,12 @@
 #define CURRENT_TIME_MS std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch().count()
 
 Application::Application(const int& _width, const int& _height)
-	: m_Renderer(new ConsoleRenderer(_width, _height))
-	, m_ObjectFactory(new ObjectFactory(m_Renderer, m_ObjectList))
-	, m_Running(true)
-	, m_CursorLocked(false)
+	: Renderer(new ConsoleRenderer(_width, _height))
+	, _ObjectFactory(new ObjectFactory(Renderer, ObjectList))
+	, Running(true)
+	, CursorLocked(false)
 {
-	Camera* cam = m_ObjectFactory->NewObject<Camera>();
+	Camera* cam = _ObjectFactory->NewObject<Camera>();
 	cam->PixelWidth = _width;
 	cam->PixelHeight = _height;
 	cam->ViewportX = 0;
@@ -26,7 +26,7 @@ Application::Application(const int& _width, const int& _height)
 		tc->SetPosition(0.f, 0.f, 5.f);
 		tc->SetRotation({0.0f, 0.0f, 0.0f});
 	}
-	RotatingModel* rm1 = m_ObjectFactory->NewObject<RotatingModel>();
+	RotatingModel* rm1 = _ObjectFactory->NewObject<RotatingModel>();
 	if (TransformComponent* t1 = rm1->GetTransform())
 	{
 		t1->SetScale(1.f);
@@ -37,12 +37,12 @@ Application::Application(const int& _width, const int& _height)
 
 Application::~Application()
 {
-	for (unsigned int i = 0; i < m_ObjectList.size(); ++i)
+	for (unsigned int i = 0; i < ObjectList.size(); ++i)
 	{
-		delete m_ObjectList[i];
+		delete ObjectList[i];
 	}
 
-	delete m_Renderer;
+	delete Renderer;
 }
 
 void Application::Run()
@@ -52,7 +52,7 @@ void Application::Run()
 	double deltaTime;
 	float deltaTimeF;
 
-	while (m_Running)
+	while (Running)
 	{
 		// Delta time
 		deltaTime = (CURRENT_TIME_MS - begin_frame) * 0.001;
@@ -63,15 +63,15 @@ void Application::Run()
 
 		//ProcessInput();
 
-		for (unsigned int i = 0; i < m_ObjectList.size(); ++i)
+		for (unsigned int i = 0; i < ObjectList.size(); ++i)
 		{
-			m_ObjectList[i]->Update(deltaTimeF);
-			m_ObjectList[i]->Render();
+			ObjectList[i]->Update(deltaTimeF);
+			ObjectList[i]->Render();
 		}
 
-		if (m_Renderer)
+		if (Renderer)
 		{
-			m_Renderer->Render(deltaTime);
+			Renderer->Render(deltaTime);
 		}
 	}
 }
@@ -80,7 +80,7 @@ void Application::ProcessInput()
 {
 	if (GetKeyState(VK_ESCAPE) & 0x8000)
 	{
-		m_Running = false;
+		Running = false;
 	}
 
 	ClipMouse();
@@ -88,10 +88,10 @@ void Application::ProcessInput()
 
 void Application::ClipMouse()
 {
-	if (HWND window = m_Renderer->GetWindow())
+	if (HWND window = Renderer->GetWindow())
 	{
 		RECT rect;
-		GetClientRect(m_Renderer->GetWindow(), &rect);
+		GetClientRect(Renderer->GetWindow(), &rect);
 
 		POINT ul;
 		ul.x = rect.left;

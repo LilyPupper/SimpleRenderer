@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Mesh.h"
 #include "glm/glm.hpp"
 
 class Tri
 {
 public:
-	Tri(const glm::vec3& _v1, const glm::vec3& _v2, const glm::vec3& _v3);
+	Tri(const Vertex& _v1, const Vertex& _v2, const Vertex& _v3);
 	~Tri();
 	
 	void RecalculateSurfaceNormal();
@@ -15,12 +16,12 @@ public:
 	Tri operator*(const glm::mat4& _m) const;
 	void operator*=(const glm::mat4& _m);
 
-	glm::vec4 v1;
-	glm::vec4 v2;
-	glm::vec4 v3;
+	Vertex v1;
+	Vertex v2;
+	Vertex v3;
 
 	bool Discard = false;
 
 private:
-	glm::vec4 m_SurfaceNormal;
+	glm::vec3 SurfaceNormal;
 };

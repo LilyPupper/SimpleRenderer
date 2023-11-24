@@ -32,19 +32,19 @@ public:
 	Component* FindComponentOfType(COMPONENT_TYPE _type);
 	Component* operator[](COMPONENT_TYPE _type);
 
-	inline TransformComponent* GetTransform() { return m_Transform; }
+	inline TransformComponent* GetTransform() { return _Transform; }
 
 	unsigned int GetObjectID();
 
 	static OBJECT_MAP GetObjectList();
 
 private:
-	unsigned int m_ObjectID;
-	std::vector<Component*> m_Components;
+	unsigned int ObjectID;
+	std::vector<Component*> Components;
 
-	TransformComponent* m_Transform;
+	TransformComponent* _Transform;
 
-	static unsigned int s_ObjectIDCount;
-	static OBJECT_MAP s_ObjectList;
+	static unsigned int sObjectIDCount;
+	static OBJECT_MAP sObjectList;
 };
 

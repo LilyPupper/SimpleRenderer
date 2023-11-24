@@ -24,6 +24,9 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 	file.open(directory);
 	if (file.is_open())
 	{
+		int normalsLoaded = 0;
+		int normalErrors = 0;
+
 		while (std::getline(file, line))
 		{
 			std::istringstream iss(line);
@@ -33,7 +36,7 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 			if (firstWord == "o")
 			{
 				// Load name
-				mesh->m_Name = line.substr(2, line.length() - 2);
+				mesh->Name = line.substr(2, line.length() - 2);
 			}
 			else if (firstWord == "v")
 			{
@@ -45,7 +48,27 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 				float y = std::stof(nextWord);
 				iss >> nextWord;
 				float z = std::stof(nextWord);
-				mesh->m_Vertices.push_back(glm::vec3(x, y, z));
+				mesh->Vertices.emplace_back(glm::vec4(x, y, z, 1.f));
+			}
+			else if (firstWord == "vn")
+			{
+				if (normalsLoaded < mesh->Vertices.size())
+				{
+					std::string nextWord;
+					iss >> nextWord;
+					float x = std::stof(nextWord);
+					iss >> nextWord;
+					float y = std::stof(nextWord);
+					iss >> nextWord;
+					float z = std::stof(nextWord);
+					mesh->Vertices[normalsLoaded].Normal = glm::normalize(glm::vec4(x, y, z, 0.f));
+					normalsLoaded++;
+				}
+				else
+				{
+					// Corrupt file?
+					normalErrors++;
+				}
 			}
 			else if (firstWord == "f")
 			{
@@ -60,13 +83,18 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 				iss >> nextWord;
 				int i4 = std::stoi(nextWord) - 1;
 
-				mesh->m_Triangles.push_back(Tri(mesh->m_Vertices[i1], mesh->m_Vertices[i2], mesh->m_Vertices[i3]));
-				mesh->m_Triangles.push_back(Tri(mesh->m_Vertices[i3], mesh->m_Vertices[i4], mesh->m_Vertices[i1]));
+				mesh->Triangles.emplace_back(Tri(mesh->Vertices[i1], mesh->Vertices[i2], mesh->Vertices[i3]));
+				mesh->Triangles.emplace_back(Tri(mesh->Vertices[i3], mesh->Vertices[i4], mesh->Vertices[i1]));
 			}
 		}
 		file.close();
 
 		mesh->RecalculateSurfaceNormals();
+
+		if (normalErrors > 0)
+		{
+			normalErrors = 0;
+		}
 
 		return mesh;
 	}
