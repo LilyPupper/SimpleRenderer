@@ -12,19 +12,6 @@ namespace Util
 		v = (v2.x * v1.y - v1.x * v2.y) / den;
 		w = (v0.x * v2.y - v2.x * v0.y) / den;
 		u = 1.0f - v - w;
-
-		//const glm::vec3 v0 = b -a;
-		//const glm::vec3 v1 = c - a;
-		//const glm::vec3 v2 = p - a;
-		//const float d00 = glm::dot(v0, v0);
-		//const float d01 = glm::dot(v0, v1);
-		//const float d11 = glm::dot(v1, v1);
-		//const float d20 = glm::dot(v2, v0);
-		//const float d21 = glm::dot(v2, v1);
-		//const float denom = d00 * d11 - d01 * d01;
-		//v = (d11 * d20 - d01 * d21) / denom;
-		//w = (d00 * d21 - d01 * d20) / denom;
-		//u = 1.f -v - w;
 	}
 
 	void OrderVerticesByYThenX(Vertex& _high, Vertex& _low)
@@ -41,6 +28,26 @@ namespace Util
 			else
 			{
 				std::swap(_high, _low);
+			}
+		}
+	}
+
+	void OrderVerticesByYThenX(Vertex& _high1, Vertex& _low1, Vertex& _high2, Vertex& _low2)
+	{
+		if (_high1.Position.y >= _low1.Position.y)
+		{
+			if (_high1.Position.y == _low1.Position.y)
+			{
+				if (_high1.Position.x > _low1.Position.x)
+				{
+					std::swap(_high1, _low1);
+					std::swap(_high2, _low2);
+				}
+			}
+			else
+			{
+				std::swap(_high1, _low1);
+				std::swap(_high2, _low2);
 			}
 		}
 	}

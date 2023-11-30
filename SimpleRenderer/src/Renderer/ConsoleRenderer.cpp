@@ -249,38 +249,31 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 		{
 			transformedTri.Discard = false;
 			return;
-		}
-		
+		}	
+
 		DrawTriangleToScreen(_tri, transformedTri, _transform);
 	}
 }
 
-// https://youtu.be/PahbNFypubE?si=WROMBcqVb14EpsfC
 void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSpaceTri, TransformComponent* const _transform)
 {
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
 
 	// Calculate lighting per tri
-	glm::vec3 lightPos{0.f, 10.f, 0.f};
+	glm::vec3 lightPos{0.f, 1000.f, 0.f};
 	Tri worldSpaceTri = _tri * _transform->GetTransformation();
+
 	worldSpaceTri.RecalculateSurfaceNormal();
 
-	//glm::vec3 avgPos = (worldSpaceTri.v1.Position + worldSpaceTri.v2.Position + worldSpaceTri.v3.Position) / 3.f;
-	//glm::vec3 normal = worldSpaceTri.GetSurfaceNormal();
-	//glm::vec3 lightDir = glm::normalize(avgPos - lightPos);
-	//float lightIntensity = glm::dot(lightDir, normal);
-	//const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(lightIntensity);
-
-	Tri screenSpacePosition = _screenSpaceTri;
-
 	// Calculate lines and triangle direction
-	Util::OrderVerticesByYThenX(screenSpacePosition.v2, screenSpacePosition.v1);
-	Util::OrderVerticesByYThenX(screenSpacePosition.v3, screenSpacePosition.v2);
-	Util::OrderVerticesByYThenX(screenSpacePosition.v2, screenSpacePosition.v1);
-
-	glm::vec4& pos1 = screenSpacePosition.v1.Position;
-	glm::vec4& pos2 = screenSpacePosition.v2.Position;
-	glm::vec4& pos3 = screenSpacePosition.v3.Position;
+	Tri screenSpaceTri = _screenSpaceTri;
+	Util::OrderVerticesByYThenX(screenSpaceTri.v2, screenSpaceTri.v1, worldSpaceTri.v2, worldSpaceTri.v1);
+	Util::OrderVerticesByYThenX(screenSpaceTri.v3, screenSpaceTri.v2, worldSpaceTri.v3, worldSpaceTri.v2);
+	Util::OrderVerticesByYThenX(screenSpaceTri.v2, screenSpaceTri.v1, worldSpaceTri.v2, worldSpaceTri.v1);
+	
+	glm::vec4& pos1 = screenSpaceTri.v1.Position;
+	glm::vec4& pos2 = screenSpaceTri.v2.Position;
+	glm::vec4& pos3 = screenSpaceTri.v3.Position;
 
 	// Early out if triangle has no area
 	if (pos1.y == pos3.y)
@@ -362,22 +355,17 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSp
 			int drawIndex = x + (y * Width);
 			float z = scanline.first.z + (depthStep * stepCount);
 
+			// Interpolate pixel position
 			float u, v, w;
-			glm::vec3 p {x, y, z};
+			glm::vec3 pixelPos {x, y, z};
+			Util::Barycentric(pixelPos, pos1, pos2, pos3, u, v, w);
 
-			glm::vec3 a = _screenSpaceTri.v1.Position;
-			glm::vec3 b = _screenSpaceTri.v2.Position;
-			glm::vec3 c = _screenSpaceTri.v3.Position;
+			glm::vec3 pixelWorldPos = (worldSpaceTri.v1.Position * u) + (worldSpaceTri.v2.Position * v) + (worldSpaceTri.v3.Position * w);
+			glm::vec3 pixelWorldNormal = glm::normalize((worldSpaceTri.v1.Normal * u) + (worldSpaceTri.v2.Normal * v) + (worldSpaceTri.v3.Normal * w));
+			//glm::vec3 pixelWorldNormal = worldSpaceTri.GetSurfaceNormal();
 
-			Util::Barycentric(p, a, b, c, u, v, w);
-
-			glm::vec3 normal = glm::normalize((worldSpaceTri.v1.Normal * u) + (worldSpaceTri.v2.Normal * v) + (worldSpaceTri.v1.Normal * w));
-			glm::vec3 pixelPos = (_screenSpaceTri.v1.Position * u) + (_screenSpaceTri.v1.Position * v) + (_screenSpaceTri.v1.Position * w);
-
-			glm::vec3 lightPos {0.f, 10.f, 0.f};
-			glm::vec3 lightDir = glm::normalize(pixelPos - lightPos);
-
-			float lightIntensity = glm::dot (normal, lightDir);
+			glm::vec3 lightDir = glm::normalize(pixelWorldPos - lightPos);
+			float lightIntensity = glm::dot(lightDir, pixelWorldNormal);
 			const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(lightIntensity);
 
 			if (DepthData[drawIndex] > z)
@@ -392,12 +380,12 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSp
 
 wchar_t ConsoleRenderer::LightIntensityToAsciiCharacter(const float _lightIntensity) const
 {
-	int index = static_cast<int>(-_lightIntensity * CharacterMapLength);
+	int index = static_cast<int>(_lightIntensity * CharacterMapLength);
 
 	if (index < 0)
 		index = 0;
-	else if (index > CharacterMapLength)
-		index = CharacterMapLength;
+	else if (index >= CharacterMapLength)
+		index = CharacterMapLength - 1;
 
 	return CharacterMap[index];
 }

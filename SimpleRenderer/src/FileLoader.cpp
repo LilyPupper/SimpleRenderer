@@ -61,7 +61,7 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 					float y = std::stof(nextWord);
 					iss >> nextWord;
 					float z = std::stof(nextWord);
-					mesh->Vertices[normalsLoaded].Normal = glm::normalize(glm::vec4(x, y, z, 0.f));
+					mesh->Vertices[normalsLoaded].Normal = glm::vec4(x, y, z, 0.f);
 					normalsLoaded++;
 				}
 				else
@@ -83,8 +83,8 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 				iss >> nextWord;
 				int i4 = std::stoi(nextWord) - 1;
 
-				mesh->Triangles.emplace_back(Tri(mesh->Vertices[i1], mesh->Vertices[i2], mesh->Vertices[i3]));
-				mesh->Triangles.emplace_back(Tri(mesh->Vertices[i3], mesh->Vertices[i4], mesh->Vertices[i1]));
+				mesh->Triangles.emplace_back(Tri{mesh->Vertices[i1], mesh->Vertices[i2], mesh->Vertices[i3]});
+				mesh->Triangles.emplace_back(Tri{mesh->Vertices[i3], mesh->Vertices[i4], mesh->Vertices[i1]});
 			}
 		}
 		file.close();

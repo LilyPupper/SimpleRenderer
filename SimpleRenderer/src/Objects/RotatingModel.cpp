@@ -29,7 +29,7 @@ void RotatingModel::Update(const float& _deltaTime)
 		
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
 
-		t->Rotate(_deltaTime * 15.f, t->GetForward());
+		//t->Rotate(_deltaTime * 15.f, t->GetForward());
 		//t->SetRotation(r * m_Time * 15.f);
 	}
 }

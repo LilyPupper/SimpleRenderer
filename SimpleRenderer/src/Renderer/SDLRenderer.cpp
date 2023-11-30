@@ -81,11 +81,6 @@ void SDLRenderer::Render(const float& _deltaTime)
 		}
 	}
 
-	// Draw a red line
-	//SDL_SetRenderDrawColor(Renderer, 255, 0, 0, 255);
-    //for (unsigned int i = 0; i < Width; ++i)
-    //    SDL_RenderPoint(Renderer, i, i);
-
 	// We're not taking input just allowing the window to be moved around so it's probably ok to poll on the render thread
 	SDL_PollEvent(&Event);
 
@@ -103,14 +98,6 @@ void SDLRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _trans
 			transformedTri.Discard = false;
 			return;
 		}
-		glm::mat4 asciiStretchReduction = {
-			3.f, 0.f, 0.f, 0.f,
-			0.f, 1.f, 0.f, 0.f,
-			0.f, 0.f, 1.f, 0.f,
-			0.f, 0.f, 0.f, 1.f
-		};
-
-		transformedTri *= asciiStretchReduction;
 
 		DrawTriangleToScreen(_tri, transformedTri, _transform);
 	}

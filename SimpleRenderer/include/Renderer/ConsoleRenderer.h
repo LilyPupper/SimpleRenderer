@@ -78,6 +78,9 @@ protected:
 	std::atomic_bool bIsScreenBufferReady;
 	std::atomic_bool bRenderThreadContinue;
 
-	const int CharacterMapLength = 9;
-	const wchar_t* CharacterMap = L".:-=+*8#%@";
+	//const int CharacterMapLength = 10;
+	//const wchar_t* CharacterMap = L" .:-=+*8#%@";
+
+	const int CharacterMapLength = 70;
+	const wchar_t* CharacterMap = L" .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 };

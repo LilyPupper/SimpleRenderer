@@ -15,6 +15,7 @@ struct Vertex
 
 	glm::vec4 Position;
 	glm::vec3 Normal;
+	float LightIntensity;
 };
 
 class Mesh

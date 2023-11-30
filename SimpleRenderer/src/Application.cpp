@@ -23,15 +23,15 @@ Application::Application(const int& _width, const int& _height)
 	cam->ViewportX = 0;
 	if (TransformComponent* tc = cam->GetTransform())
 	{
-		tc->SetPosition(0.f, 0.f, 5.f);
+		tc->SetPosition(0.f, -5.f, 50.f);
 		tc->SetRotation({0.0f, 0.0f, 0.0f});
 	}
 	RotatingModel* rm1 = _ObjectFactory->NewObject<RotatingModel>();
 	if (TransformComponent* t1 = rm1->GetTransform())
 	{
 		t1->SetScale(1.f);
-		t1->SetPosition(0.f, 0.0f, 0.0f);
-		t1->SetRotation(glm::vec3(0.f, 180.f, 180.f));
+		t1->SetPosition(0.f, 0.f, 0.f);
+		t1->SetRotation(glm::vec3(90.f, 180.f, 0.f));
 	}
 }
 

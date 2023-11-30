@@ -36,8 +36,7 @@ Tri Tri::operator*(glm::mat4& _m) const
 	const Vertex _v2(_m * v2.Position, _m * glm::vec4(v2.Normal, 0.f));
 	const Vertex _v3(_m * v3.Position, _m * glm::vec4(v3.Normal, 0.f));
 
-	Tri t = Tri(_v1, _v2, _v3);
-	return t;
+	return Tri{_v1, _v2, _v3};
 }
 
 Tri Tri::operator*(const glm::mat4& _m) const
@@ -46,8 +45,7 @@ Tri Tri::operator*(const glm::mat4& _m) const
 	const Vertex _v2(_m * v2.Position, _m * glm::vec4(v2.Normal, 0.f));
 	const Vertex _v3(_m * v3.Position, _m * glm::vec4(v3.Normal, 0.f));
 
-	Tri t = Tri(_v1, _v2, _v3);
-	return t;
+	return Tri{_v1, _v2, _v3};
 }
 
 void Tri::operator*=(const glm::mat4& _m)

@@ -149,9 +149,13 @@ glm::mat4 Camera::GetMVMatrix(TransformComponent* _transform)
 Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transform)
 {
 	glm::mat4 MVP = GetMVPMatrix(_transform);
-	Vertex vert1(MVP * _tri.v1.Position, _tri.v1.Normal);
-	Vertex vert2(MVP * _tri.v2.Position, _tri.v2.Normal);
-	Vertex vert3(MVP * _tri.v3.Position, _tri.v3.Normal);
+
+	glm::mat3 MV = GetMVMatrix(_transform);
+	//glm::mat3 normalMatrix = (glm::mat3(V));
+
+	Vertex vert1(MVP * _tri.v1.Position, MV * _tri.v1.Normal);
+	Vertex vert2(MVP * _tri.v2.Position, MV * _tri.v2.Normal);
+	Vertex vert3(MVP * _tri.v3.Position, MV * _tri.v3.Normal);
 	
 	Tri transformedTri(vert1, vert2, vert3);
 	transformedTri.RecalculateSurfaceNormal();
@@ -159,12 +163,13 @@ Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transfor
 	// Backface culling
 	// as we're in clip space, avgPos is a direction vector from the camera to the centre of the tri
 	glm::vec3 avgPos = (vert1.Position + vert2.Position + vert3.Position) / 3.f;
-	if (glm::dot(glm::vec3(transformedTri.GetSurfaceNormal()), avgPos) >= 0.f)
+	if (glm::dot(glm::vec3(transformedTri.GetSurfaceNormal()), avgPos) > 0.f)
 	{
 		transformedTri.Discard = true;
 		return transformedTri;
 	}
 
+	// Perspective division
 	vert1.Position.x /= vert1.Position.w;
 	vert2.Position.x /= vert2.Position.w;
 	vert3.Position.x /= vert3.Position.w;
@@ -177,17 +182,28 @@ Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transfor
 	vert2.Position.z /= vert2.Position.w;
 	vert3.Position.z /= vert3.Position.w;
 
-	vert1.Position.z = (((FarPlane - NearPlane) * vert1.Position.z) + NearPlane + FarPlane) / 2.f;
-	vert2.Position.z = (((FarPlane - NearPlane) * vert2.Position.z) + NearPlane + FarPlane) / 2.f;
-	vert3.Position.z = (((FarPlane - NearPlane) * vert3.Position.z) + NearPlane + FarPlane) / 2.f;
+	auto NormalizeDepth = [this](float& depth)
+	{
+		depth = (((FarPlane - NearPlane) * depth) + NearPlane + FarPlane) / 2.f;
+	};
 
-	transformedTri.v1.Position.x = ((vert1.Position.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
-	transformedTri.v2.Position.x = ((vert2.Position.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
-	transformedTri.v3.Position.x = ((vert3.Position.x + 1.0f) * ((float)PixelWidth / 2)) + ViewportX;
+	NormalizeDepth(vert1.Position.z);
+	NormalizeDepth(vert2.Position.z);
+	NormalizeDepth(vert3.Position.z);
 
-	transformedTri.v1.Position.y = ((vert1.Position.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
-	transformedTri.v2.Position.y = ((vert2.Position.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
-	transformedTri.v3.Position.y = ((vert3.Position.y + 1.0f) * ((float)PixelHeight / 2)) + ViewportY;
+
+	auto ViewportTransform = [](float& position, float dimension, float viewportParam) -> float
+	{
+		return ((position + 1.0f) * (dimension / 2.f)) + viewportParam;
+	};
+
+	transformedTri.v1.Position.x = ViewportTransform(vert1.Position.x, PixelWidth, ViewportX);
+	transformedTri.v2.Position.x = ViewportTransform(vert2.Position.x, PixelWidth, ViewportX);
+	transformedTri.v3.Position.x = ViewportTransform(vert3.Position.x, PixelWidth, ViewportX);
+	
+	transformedTri.v1.Position.y = ViewportTransform(vert1.Position.y, PixelHeight, ViewportY);
+	transformedTri.v2.Position.y = ViewportTransform(vert2.Position.y, PixelHeight, ViewportY);
+	transformedTri.v3.Position.y = ViewportTransform(vert3.Position.y, PixelHeight, ViewportY);
 						  
 	// Frustum culling
 	auto OutsideFrustum = [this](const Tri& _tri) -> bool
@@ -201,11 +217,8 @@ Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transfor
 	
 		return ClipVec3(_tri.v1.Position) && ClipVec3(_tri.v2.Position) && ClipVec3(_tri.v3.Position);
 	};
-	
-	if (OutsideFrustum(transformedTri))
-	{
-		transformedTri.Discard = true;
-	}
+
+	transformedTri.Discard = OutsideFrustum(transformedTri);
 
 	return transformedTri;
 }

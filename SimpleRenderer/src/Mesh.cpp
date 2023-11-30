@@ -5,17 +5,20 @@
 Vertex::Vertex()
 	: Position(glm::vec4())
 	, Normal(glm::vec3())
+	, LightIntensity(0.f)
 {}
 
 Vertex::Vertex(const glm::vec4& _position)
 	: Position(_position)
 	, Normal(glm::vec3(0.f, 0.f, 0.f))
+	, LightIntensity(0.f)
 {}
 
 
 Vertex::Vertex(const glm::vec4& _position, const glm::vec3& _normal)
 	: Position(_position)
 	, Normal(_normal)
+	, LightIntensity(0.f)
 {}
 
 Mesh::Mesh()
