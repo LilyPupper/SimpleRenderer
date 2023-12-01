@@ -15,7 +15,6 @@ Application::Application(const int& _width, const int& _height)
 	: Renderer(new ConsoleRenderer(_width, _height))
 	, _ObjectFactory(new ObjectFactory(Renderer, ObjectList))
 	, Running(true)
-	, CursorLocked(false)
 {
 	Camera* cam = _ObjectFactory->NewObject<Camera>();
 	cam->PixelWidth = _width;
@@ -73,43 +72,5 @@ void Application::Run()
 		{
 			Renderer->Render(deltaTime);
 		}
-	}
-}
-
-void Application::ProcessInput()
-{
-	if (GetKeyState(VK_ESCAPE) & 0x8000)
-	{
-		Running = false;
-	}
-
-	ClipMouse();
-}
-
-void Application::ClipMouse()
-{
-	if (HWND window = Renderer->GetWindow())
-	{
-		RECT rect;
-		GetClientRect(Renderer->GetWindow(), &rect);
-
-		POINT ul;
-		ul.x = rect.left;
-		ul.y = rect.top;
-
-		POINT lr;
-		lr.x = rect.right;
-		lr.y = rect.bottom;
-
-		MapWindowPoints(window, nullptr, &ul, 1);
-		MapWindowPoints(window, nullptr, &lr, 1);
-
-		rect.left = ul.x;
-		rect.top = ul.y;
-
-		rect.right = lr.x;
-		rect.bottom = lr.y;
-
-		ClipCursor(&rect);
 	}
 }

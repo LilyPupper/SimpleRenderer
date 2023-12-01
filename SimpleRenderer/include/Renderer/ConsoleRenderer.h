@@ -32,6 +32,8 @@ public:
 
 	wchar_t LightIntensityToAsciiCharacter(const float _lightIntensity) const;
 
+	void PrintToFile(const bool _cropImage = true) const;
+
 	inline void WriteToScreen(int _row, int _col, wchar_t _char)
 	{
 		GetCurrentScreenBuffer()[_row * Width + _col] = _char;

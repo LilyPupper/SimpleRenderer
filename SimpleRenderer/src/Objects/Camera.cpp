@@ -16,6 +16,7 @@ Camera::Camera(const int _pixelWidth /*= 0*/, const int _pixelHeight /*= 0*/, co
 	, AspectRatio((float)_pixelWidth/(float)_pixelHeight)
 	, NearPlane(_nearPlane)
 	, FarPlane(_farPlane)
+	, Rotation(glm::vec3())
 {
 	if (Main)
 	{
@@ -36,7 +37,6 @@ void Camera::Update(const float& _deltaTime)
 	{
 		exit(0);
 	}
-
 
 	TransformComponent* t = GetTransform();
 	if (!t)
@@ -78,27 +78,25 @@ void Camera::Update(const float& _deltaTime)
 	}
 
 	// Rotate
-	const float rotSpeed = 50.f * _deltaTime;
+	const float rotSpeed = 65.f * _deltaTime;
 	if (GetKeyState(VK_UP) & 0x8000)
 	{
-		const float rot = -rotSpeed;
-		t->RotateX(rot);
+		Rotation.x -= rotSpeed;
 	}
 	if (GetKeyState(VK_DOWN) & 0x8000)
 	{
-		const float rot = rotSpeed;
-		t->RotateX(rot);
+		Rotation.x += rotSpeed;
 	}
 	if (GetKeyState(VK_RIGHT) & 0x8000)
 	{
-		const float rot = -rotSpeed;
-		t->RotateY(rot);
+		Rotation.y -= rotSpeed;
 	}
 	if (GetKeyState(VK_LEFT) & 0x8000)
 	{
-		const float rot = rotSpeed;
-		t->RotateY(rot);
+		Rotation.y += rotSpeed;
 	}
+
+	t->SetRotation(Rotation);
 
 	// Move viewport
 	const float viewportSpeed = 25.f * _deltaTime;

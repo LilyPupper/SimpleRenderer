@@ -37,4 +37,7 @@ public:
 	float FOV;
 	float AspectRatio;
 	float NearPlane, FarPlane;
+
+private:
+	glm::vec3 Rotation;
 };

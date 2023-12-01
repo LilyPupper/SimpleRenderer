@@ -6,6 +6,7 @@
 #include "Components/TransformComponent.h"
 #include "Objects/Camera.h"
 
+#include <fstream>
 #include <iostream>
 #include <conio.h>
 #include <limits>
@@ -144,7 +145,6 @@ bool ConsoleRenderer::InitialiseConsoleWindow()
 
 	// Create Screen Buffer
 	ConsoleBuffer = new wchar_t[Width * Height];
-	std::fill_n(ConsoleBuffer, Width * Height, L'a');
 
 	Console = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	if (Console == INVALID_HANDLE_VALUE)
@@ -170,7 +170,13 @@ bool ConsoleRenderer::InitialiseConsoleWindow()
 }
 
 void ConsoleRenderer::Render(const float& _deltaTime)
-{ 
+{
+	if (GetKeyState(VK_SNAPSHOT) & 0x8000)
+	{
+		PrintToFile();
+	}
+
+
 	const TransformComponent* cameraTransform = Camera::Main->GetTransform();
 	if (!cameraTransform)
 	{
@@ -390,4 +396,69 @@ wchar_t ConsoleRenderer::LightIntensityToAsciiCharacter(const float _lightIntens
 		index = CharacterMapLength - 1;
 
 	return CharacterMap[index];
+}
+
+void ConsoleRenderer::PrintToFile(const bool _cropImage /*= true*/) const
+{
+	const wchar_t* currentImageData = GetCurrentScreenBuffer();
+
+	int startX = 0, startY = 0;
+	int endX = Width;
+	int endY = Height;
+	if (_cropImage)
+	{
+		int lowest = Height;
+		int highest = 0;
+		int leftmost = Width;
+		int rightmost = 0;
+
+		for (int y = 0; y < Height; ++y)
+		{
+			for(int x = 0; x < Width; ++x)
+			{
+				const int index = x + (y * Width);
+				const wchar_t currentChar = currentImageData[index];
+
+				if (currentChar != 0)
+				{
+					if (x < leftmost)
+					{
+						leftmost = x;
+					}
+					if (x > rightmost)
+					{
+						rightmost = x;
+					}
+					if (y < lowest)
+					{
+						lowest = y;
+					}
+					if (y > highest)
+					{
+						highest = y;
+					}
+				}
+				
+			}
+		}
+
+		startX = leftmost;
+		endX = rightmost;
+		startY = lowest;
+		endY = highest;
+	}
+
+	std::wofstream out("Screenshot.txt");
+	
+	for (int y = startY; y < endY; ++y)
+	{
+		for(int x = startX; x < endX; ++x)
+		{
+			const int index = x + (y * Width);
+			out << currentImageData[index];
+		}
+		out << "\n";
+	}
+	
+	out.close();
 }
