@@ -259,17 +259,14 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSp
 {
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
 
-	// Calculate lighting per tri
-	glm::vec3 lightPos{0.f, 1000.f, 0.f};
 	Tri worldSpaceTri = _tri * _transform->GetTransformation();
-
 	worldSpaceTri.RecalculateSurfaceNormal();
 
 	// Calculate lines and triangle direction
 	Tri screenSpaceTri = _screenSpaceTri;
-	Util::OrderVerticesByYThenX(screenSpaceTri.v2, screenSpaceTri.v1, worldSpaceTri.v2, worldSpaceTri.v1);
-	Util::OrderVerticesByYThenX(screenSpaceTri.v3, screenSpaceTri.v2, worldSpaceTri.v3, worldSpaceTri.v2);
-	Util::OrderVerticesByYThenX(screenSpaceTri.v2, screenSpaceTri.v1, worldSpaceTri.v2, worldSpaceTri.v1);
+	Util::OrderVerticesByYThenX(screenSpaceTri.v2, screenSpaceTri.v1);
+	Util::OrderVerticesByYThenX(screenSpaceTri.v3, screenSpaceTri.v2);
+	Util::OrderVerticesByYThenX(screenSpaceTri.v2, screenSpaceTri.v1);
 	
 	glm::vec4& pos1 = screenSpaceTri.v1.Position;
 	glm::vec4& pos2 = screenSpaceTri.v2.Position;
@@ -346,32 +343,37 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSp
 		int stepCount = 0;
 		for (float i = scanline.first.x; i >= scanline.first.x - distance; i -= 1.f)
 		{
-			int x = std::floor(i);
-			int y = std::floor(scanline.first.y);
+			const float fx = i;
+			const float fy = scanline.first.y;
+
+			const int x = std::floor(fx);
+			const int y = std::floor(fy);
 
 			if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1)
 				continue;
 	
-			int drawIndex = x + (y * Width);
-			float z = scanline.first.z + (depthStep * stepCount);
+			const int drawIndex = x + (y * Width);
+			const float fz = scanline.first.z + (depthStep * stepCount);
 
-			// Interpolate pixel position
-			float u, v, w;
-			glm::vec3 pixelPos {x, y, z};
-			Util::Barycentric(pixelPos, pos1, pos2, pos3, u, v, w);
-
-			glm::vec3 pixelWorldPos = (worldSpaceTri.v1.Position * u) + (worldSpaceTri.v2.Position * v) + (worldSpaceTri.v3.Position * w);
-			glm::vec3 pixelWorldNormal = glm::normalize((worldSpaceTri.v1.Normal * u) + (worldSpaceTri.v2.Normal * v) + (worldSpaceTri.v3.Normal * w));
-			//glm::vec3 pixelWorldNormal = worldSpaceTri.GetSurfaceNormal();
-
-			glm::vec3 lightDir = glm::normalize(pixelWorldPos - lightPos);
-			float lightIntensity = glm::dot(lightDir, pixelWorldNormal);
-			const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(lightIntensity);
-
-			if (DepthData[drawIndex] > z)
+			if (DepthData[drawIndex] > fz)
 			{
+				// Interpolate pixel position
+				float u, v, w;
+				const glm::vec3 pixelPos {fx, fy, fz};
+				Util::Barycentric(pixelPos, _screenSpaceTri.v1.Position, _screenSpaceTri.v2.Position, _screenSpaceTri.v3.Position, u, v, w);
+
+				const glm::vec3 pixelWorldPos = worldSpaceTri.v1.Position * u + worldSpaceTri.v2.Position * v + worldSpaceTri.v3.Position * w;
+				const glm::vec3 pixelWorldNormal = glm::normalize(worldSpaceTri.v1.Normal * u + worldSpaceTri.v2.Normal * v + worldSpaceTri.v3.Normal * w);
+
+				const glm::vec3 lightPos{0.f, 1000.f, 0.f};
+
+				const glm::vec3 lightDir = glm::normalize(pixelWorldPos - lightPos);
+				const float lightIntensity = glm::dot(lightDir, pixelWorldNormal);
+				const wchar_t CharacterToDraw = LightIntensityToAsciiCharacter(lightIntensity);
+
+
 				currentImageData[drawIndex] = CharacterToDraw;
-				DepthData[drawIndex] = z;
+				DepthData[drawIndex] = fz;
 			}
 			stepCount++;
 		}
@@ -380,7 +382,7 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSp
 
 wchar_t ConsoleRenderer::LightIntensityToAsciiCharacter(const float _lightIntensity) const
 {
-	int index = static_cast<int>(_lightIntensity * CharacterMapLength);
+	int index = static_cast<int>(_lightIntensity * static_cast<float>(CharacterMapLength));
 
 	if (index < 0)
 		index = 0;

@@ -31,24 +31,4 @@ namespace Util
 			}
 		}
 	}
-
-	void OrderVerticesByYThenX(Vertex& _high1, Vertex& _low1, Vertex& _high2, Vertex& _low2)
-	{
-		if (_high1.Position.y >= _low1.Position.y)
-		{
-			if (_high1.Position.y == _low1.Position.y)
-			{
-				if (_high1.Position.x > _low1.Position.x)
-				{
-					std::swap(_high1, _low1);
-					std::swap(_high2, _low2);
-				}
-			}
-			else
-			{
-				std::swap(_high1, _low1);
-				std::swap(_high2, _low2);
-			}
-		}
-	}
 }

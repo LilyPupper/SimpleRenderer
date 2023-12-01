@@ -1,0 +1,7 @@
+Models require:
+- Smooth shading
+- UV Coordinates
+- Normals
+- Triangulated Mesh
+
+If models have artifacting check that these requirements are met.

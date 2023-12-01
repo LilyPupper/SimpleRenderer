@@ -29,6 +29,5 @@ public:
 	const char* MeshID;
 
 	std::string Name;
-	std::vector<Vertex> Vertices;
 	std::vector<Tri> Triangles;
 };

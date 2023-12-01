@@ -32,6 +32,12 @@ void Camera::Update(const float& _deltaTime)
 {
 	Object::Update(_deltaTime);
 
+	if (GetKeyState(VK_ESCAPE) & 0x8000)
+	{
+		exit(0);
+	}
+
+
 	TransformComponent* t = GetTransform();
 	if (!t)
 	{
@@ -210,9 +216,9 @@ Tri Camera::TriangleToScreenSpace(const Tri& _tri, TransformComponent* _transfor
 	{
 		auto ClipVec3 = [this](const glm::vec4& _vec) -> bool
 		{
-			return  (_vec.x < ViewportX) || (_vec.x > (float)PixelWidth) ||
-					(_vec.y < ViewportY) || (_vec.y > (float)PixelHeight) ||
-					(_vec.z < NearPlane) || (_vec.z > FarPlane);			
+			return  (_vec.x < ViewportX) && (_vec.x > (float)PixelWidth) &&
+					(_vec.y < ViewportY) && (_vec.y > (float)PixelHeight) &&
+					(_vec.z < NearPlane) && (_vec.z > FarPlane);			
 		};
 	
 		return ClipVec3(_tri.v1.Position) && ClipVec3(_tri.v2.Position) && ClipVec3(_tri.v3.Position);

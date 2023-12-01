@@ -81,6 +81,6 @@ protected:
 	//const int CharacterMapLength = 10;
 	//const wchar_t* CharacterMap = L" .:-=+*8#%@";
 
-	const int CharacterMapLength = 70;
-	const wchar_t* CharacterMap = L" .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+	const int CharacterMapLength = 69;
+	const wchar_t* CharacterMap = L".'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 };
