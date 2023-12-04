@@ -28,6 +28,9 @@ public:
 	virtual void Update(const float& _deltaTime);
 	virtual void Render();
 
+	inline void SetActive(const bool _active) { bActive = _active; }
+	inline bool IsActive() const { return bActive; }
+
 	void AddComponent(Component* _component);
 	Component* FindComponentOfType(COMPONENT_TYPE _type);
 	Component* operator[](COMPONENT_TYPE _type);
@@ -37,6 +40,9 @@ public:
 	unsigned int GetObjectID();
 
 	static OBJECT_MAP GetObjectList();
+
+protected:
+	bool bActive;
 
 private:
 	unsigned int ObjectID;

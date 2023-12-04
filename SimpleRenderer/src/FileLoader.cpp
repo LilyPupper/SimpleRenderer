@@ -17,6 +17,7 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 	LoadObjData(_meshPath, name, vertices, UVs, normals, faces);
 
 	Mesh* m = new Mesh();
+	m->Name = name;
 	for (Face face : faces)
 	{
 		m->Triangles.emplace_back(

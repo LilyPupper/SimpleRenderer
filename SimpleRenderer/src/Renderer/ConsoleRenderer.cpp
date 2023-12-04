@@ -44,7 +44,7 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	bRenderThreadContinue = true;
 	bIsScreenBufferReady = false;
 
-	bMultithreaded = true;
+	bMultithreaded = false;
 
 	ThreadPool.enqueue([this]()
 	{
@@ -186,7 +186,7 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
 
 	// Reset depth texture
-	std::fill_n(currentImageData, Width * Height, 0);
+	std::fill_n(currentImageData, Width * Height, L' ');
 	std::fill_n(DepthData, Width * Height, std::numeric_limits<float>::max());
 
 	if (bMultithreaded)
@@ -237,7 +237,7 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 		NextScreenBuffer();
 	}
 
-	Sleep(5);
+	//Sleep(1);
 }
 
 void ConsoleRenderer::PushToScreen(const float& _deltaTime)
@@ -419,7 +419,7 @@ void ConsoleRenderer::PrintToFile(const bool _cropImage /*= true*/) const
 				const int index = x + (y * Width);
 				const wchar_t currentChar = currentImageData[index];
 
-				if (currentChar != 0)
+				if (currentChar != L' ')
 				{
 					if (x < leftmost)
 					{

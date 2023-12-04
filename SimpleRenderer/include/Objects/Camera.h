@@ -8,7 +8,7 @@
 class Camera : public Object
 {
 public:
-	Camera(const int _pixelWidth = 1, const int _pixelHeight = 1, const int _viewportX = 0, const int _viewportY = 0, const float _FOV = 60.f, const float _nearPlane = 0.1f, const float _farPlane = 1000.f);
+	Camera(const int _pixelWidth = 1, const int _pixelHeight = 1, const int _viewportX = 0, const int _viewportY = 0, const float _FOV = 60.f, const float _nearPlane = 1.f, const float _farPlane = 1000.f);
 	~Camera();
 
 	static ObjectType GetObjectType() { return ObjectType::MovableCamera; }

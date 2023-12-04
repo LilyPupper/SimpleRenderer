@@ -13,7 +13,7 @@ ObjectFactory::ObjectFactory(RendererBase* _renderer, std::vector<Object*>& _obj
 	, ObjectList(_objectList)
 {}
 
-Object* ObjectFactory::NewObject(ObjectType type)
+Object* ObjectFactory::NewObject(ObjectType type, const ObjectDefinition& _definition)
 {
 	if (!_Renderer)
 	{
@@ -33,7 +33,7 @@ Object* ObjectFactory::NewObject(ObjectType type)
 		{
 			obj = new RotatingModel();
 
-			const char* meshID = _Renderer->RegisterMesh("models\\Skull.obj");
+			const char* meshID = _Renderer->RegisterMesh(_definition.ModelPath.c_str());
 			obj->AddComponent(new MeshComponent(obj, _Renderer, meshID));
 
 			break;

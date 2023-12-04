@@ -7,7 +7,8 @@ unsigned int Object::sObjectIDCount = 0;
 OBJECT_MAP Object::sObjectList;
 
 Object::Object()
-	: _Transform(new TransformComponent(this))
+	: bActive(true)
+	, _Transform(new TransformComponent(this))
 {
 	ObjectID = sObjectIDCount;
 	++sObjectIDCount;

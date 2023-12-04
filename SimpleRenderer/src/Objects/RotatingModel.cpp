@@ -16,8 +16,8 @@ void RotatingModel::Update(const float& _deltaTime)
 	Object::Update(_deltaTime);
 
 	float angleXIncrease = 0.25f;
-	float angleYIncrease = 0;//.75f;
-	float angleZIncrease = 0;//.325f;
+	float angleYIncrease = 0.75f;
+	float angleZIncrease = 0.325f;
 
 	Time += _deltaTime;
 
@@ -29,8 +29,8 @@ void RotatingModel::Update(const float& _deltaTime)
 		
 		glm::vec3 r(angleXIncrease, angleYIncrease, angleZIncrease);
 
-		//t->Rotate(_deltaTime * 15.f, t->GetForward());
-		//t->SetRotation(r * m_Time * 15.f);
+		const float rotSpeed = 15.f;
+		t->Rotate(_deltaTime * rotSpeed, t->GetForward());
 	}
 }
 

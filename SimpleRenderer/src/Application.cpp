@@ -22,15 +22,66 @@ Application::Application(const int& _width, const int& _height)
 	cam->ViewportX = 0;
 	if (TransformComponent* tc = cam->GetTransform())
 	{
-		tc->SetPosition(0.f, -5.f, 50.f);
+		tc->SetPosition(0.f, 0.f, 0.f);
 		tc->SetRotation({0.0f, 0.0f, 0.0f});
 	}
-	RotatingModel* rm1 = _ObjectFactory->NewObject<RotatingModel>();
-	if (TransformComponent* t1 = rm1->GetTransform())
+
+	RotatingModel* skull = _ObjectFactory->NewObject<RotatingModel>({"models/Skull.obj"});
+	skull->SetActive(false);
+	if (TransformComponent* skullTransform = skull->GetTransform())
 	{
-		t1->SetScale(1.f);
-		t1->SetPosition(0.f, 0.f, 0.f);
-		t1->SetRotation(glm::vec3(90.f, 180.f, 0.f));
+		skullTransform->SetScale(1.5f);
+		skullTransform->SetPosition(0.f, 0.f, -50.f);
+		skullTransform->SetRotation(glm::vec3(90.f, 180.f, 0.f));
+	}
+
+	RotatingModel* cat = _ObjectFactory->NewObject<RotatingModel>({"models/Cat.obj"});
+	cat->SetActive(false);
+	if (TransformComponent* catTransform = cat->GetTransform())
+	{
+		catTransform->SetScale(10.f);
+		catTransform->SetPosition(50.f, 0.f, -50.f);
+		catTransform->SetRotation(glm::vec3(180.f, -90.f, 0.f));
+	}
+	RotatingModel* monkey = _ObjectFactory->NewObject<RotatingModel>({"models/Monkey.obj"});
+	monkey->SetActive(false);
+	if (TransformComponent* monkeyTransform = monkey->GetTransform())
+	{
+		monkeyTransform->SetScale(20.f);
+		monkeyTransform->SetPosition(-50.f, -20.f, -50.f);
+		monkeyTransform->SetRotation(glm::vec3(180.f, 180.f, 0.f));
+	}
+
+	RotatingModel* triangle = _ObjectFactory->NewObject<RotatingModel>({ "models/Triangle.obj" });
+	if (TransformComponent* triangleTransform = triangle->GetTransform())
+	{
+		triangleTransform->SetScale(4.f);
+		triangleTransform->SetPosition(50.f, -20.f, 50.f);
+		triangleTransform->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	}
+
+	RotatingModel* torusHigh = _ObjectFactory->NewObject<RotatingModel>({ "models/Torus_High.obj" });
+	if (TransformComponent* torusTransform = torusHigh->GetTransform())
+	{
+		torusTransform->SetScale(15.f);
+		torusTransform->SetPosition(0.f, -20.f, 50.f);
+		torusTransform->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	}
+
+	RotatingModel* cube = _ObjectFactory->NewObject<RotatingModel>({ "models/Cube.obj" });
+	if (TransformComponent* cubeTransform = cube->GetTransform())
+	{
+		cubeTransform->SetScale(5.f);
+		cubeTransform->SetPosition(-50.f, -20.f, 50.f);
+		cubeTransform->SetRotation(glm::vec3(0.f, 0.f, 0.f));
+	}
+
+	RotatingModel* cube1 = _ObjectFactory->NewObject<RotatingModel>({ "models/Cube.obj" });
+	if (TransformComponent* cube1Transform = cube1->GetTransform())
+	{
+		cube1Transform->SetScale(5.f);
+		cube1Transform->SetPosition(-100.f, -20.f, 50.f);
+		cube1Transform->SetRotation(glm::vec3(0.f, 0.f, 0.f));
 	}
 }
 
@@ -60,11 +111,12 @@ void Application::Run()
 		// Reseting the frame
 		begin_frame = CURRENT_TIME_MS;
 
-		//ProcessInput();
-
 		for (unsigned int i = 0; i < ObjectList.size(); ++i)
 		{
-			ObjectList[i]->Update(deltaTimeF);
+			if (ObjectList[i]->IsActive())
+			{
+				ObjectList[i]->Update(deltaTimeF);
+			}
 			ObjectList[i]->Render();
 		}
 
