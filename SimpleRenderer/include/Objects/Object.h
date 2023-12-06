@@ -20,7 +20,7 @@ enum ObjectType
 class Object
 {
 public:
-	Object();
+	Object(Object* _parent = nullptr);
 	~Object();
 
 	inline static ObjectType GetObjectType() { return ObjectType::Default; }
@@ -41,10 +41,14 @@ public:
 
 	static OBJECT_MAP GetObjectList();
 
+	inline Object* GetParent() const { return Parent; }
+
 protected:
 	bool bActive;
 
 private:
+	Object* Parent;
+
 	unsigned int ObjectID;
 	std::vector<Component*> Components;
 

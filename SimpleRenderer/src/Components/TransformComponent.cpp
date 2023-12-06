@@ -167,5 +167,11 @@ glm::mat4 TransformComponent::GetTransformation()
 {
 	RebuildTransformation();
 
-	return TransformationMatrix;
+	glm::mat4 parentTransform = glm::identity<glm::mat4>();
+	if (Object* parent = GetOwner()->GetParent())
+	{
+		parentTransform = parent->GetTransform()->GetTransformation();
+	}
+
+	return parentTransform * TransformationMatrix;
 }

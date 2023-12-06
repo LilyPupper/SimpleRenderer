@@ -18,7 +18,8 @@ class FileLoader
 
 public:
 	// Caller owns Mesh*
-	static Mesh* LoadMesh(const char* _meshPath);
+	static Mesh* LoadMesh(const std::string& _meshPath);
 
-	static void LoadObjData(const char* _meshPath, std::string& _name, std::vector<glm::vec3>& _vertices, std::vector<glm::vec2>& _UVs, std::vector<glm::vec3>& _normals, std::vector<Face>& _faces);
+private: 
+	static void LoadObjData(const std::string& _meshPath, std::string& _name, std::vector<glm::vec3>& _vertices, std::vector<glm::vec2>& _UVs, std::vector<glm::vec3>& _normals, std::vector<Face>& _faces);
 };

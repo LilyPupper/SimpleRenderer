@@ -2,22 +2,24 @@
 
 #include "Component.h"
 
+#include <string>
+
 class RendererBase;
 
 class MeshComponent : public Component
 {
 public:
-	MeshComponent(Object* _owner, RendererBase* _renderer, const char* meshID);
+	MeshComponent(Object* _owner, RendererBase* _renderer, const std::string& meshID);
 	~MeshComponent();
 
 	virtual void Update(const float& _deltaTime);
 	virtual void Render();
 
-	inline const char* GetMeshID() { return MeshID; }
+	inline const std::string& GetMeshID() const { return MeshID; }
 
 private:
 	bool bVisible;
-	const char* MeshID;
+	std::string MeshID;
 
 	RendererBase* _Renderer;
 };

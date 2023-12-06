@@ -3,6 +3,8 @@
 #include "Mesh.h"
 #include "glm/glm.hpp"
 
+#include "Windows.h"
+
 class Tri
 {
 public:
@@ -15,6 +17,8 @@ public:
 	Tri operator*(glm::mat4& _m) const;
 	Tri operator*(const glm::mat4& _m) const;
 	void operator*=(const glm::mat4& _m);
+
+	WORD Colour;
 
 	Vertex v1;
 	Vertex v2;

@@ -2,7 +2,7 @@
 
 #include "Renderer/RendererBase.h"
 
-MeshComponent::MeshComponent(Object* _owner, RendererBase* _renderer, const char* meshID)
+MeshComponent::MeshComponent(Object* _owner, RendererBase* _renderer, const std::string& meshID)
 	: Component(_owner)
 	, bVisible(true)
 	, _Renderer(_renderer)

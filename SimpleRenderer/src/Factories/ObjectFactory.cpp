@@ -31,9 +31,9 @@ Object* ObjectFactory::NewObject(ObjectType type, const ObjectDefinition& _defin
 		}
 		case ObjectType::RotatingMonkey:
 		{
-			obj = new RotatingModel();
+			obj = new RotatingModel(_definition.Parent);
 
-			const char* meshID = _Renderer->RegisterMesh(_definition.ModelPath.c_str());
+			const std::string& meshID = _Renderer->RegisterMesh(_definition.ModelPath);
 			obj->AddComponent(new MeshComponent(obj, _Renderer, meshID));
 
 			break;

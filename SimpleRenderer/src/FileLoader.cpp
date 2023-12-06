@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 
-Mesh* FileLoader::LoadMesh(const char* _meshPath)
+Mesh* FileLoader::LoadMesh(const std::string& _meshPath)
 {
 	std::string name;
 	std::vector<glm::vec3> vertices;
@@ -26,11 +26,26 @@ Mesh* FileLoader::LoadMesh(const char* _meshPath)
 			Vertex{glm::vec4(vertices[std::get<0>(face.f3) - 1], 1.f), normals[std::get<2>(face.f3) - 1]}
 		);
 	}
+
+	if (_meshPath == "models/Skull.obj")
+	{
+		for(Tri& t : m->Triangles)
+		{
+			t.Colour = FOREGROUND_RED;
+		}
+	}
+	else
+	{
+		for(Tri& t : m->Triangles)
+		{
+			t.Colour = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+		}
+	}
 	return m;
 }
 
 
-void FileLoader::LoadObjData(const char* _meshPath, std::string& _name, std::vector<glm::vec3>& _vertices, std::vector<glm::vec2>& _UVs, std::vector<glm::vec3>& _normals, std::vector<Face>& _faces)
+void FileLoader::LoadObjData(const std::string& _meshPath, std::string& _name, std::vector<glm::vec3>& _vertices, std::vector<glm::vec2>& _UVs, std::vector<glm::vec3>& _normals, std::vector<Face>& _faces)
 {
 	// Get current exe path
 	char cCurrentPath[FILENAME_MAX];

@@ -4,8 +4,9 @@
 #include "Components/MeshComponent.h"
 #include "Renderer/RendererBase.h"
 
-RotatingModel::RotatingModel()
-	: Time(0.0f)
+RotatingModel::RotatingModel(Object* _parent /*= nullptr*/)
+	: Object(_parent)
+	, Time(0.0f)
 {}
 
 RotatingModel::~RotatingModel()

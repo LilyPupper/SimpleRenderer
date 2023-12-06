@@ -24,12 +24,12 @@ public:
 
 	virtual void Render(const float& _deltaTime) = 0;
 
-	void DrawMesh(const char* _modelReference, TransformComponent* const _transform)
+	void DrawMesh(const std::string& _modelReference, TransformComponent* const _transform)
 	{
 		ObjectsToRender.push_back(std::make_pair(_modelReference, _transform));
 	}
 
-	const char* RegisterMesh(const char* _meshPath)
+	const std::string& RegisterMesh(const std::string& _meshPath)
 	{
 		Mesh* mesh = RegisteredModels[_meshPath];
 		if (mesh == nullptr)
@@ -62,9 +62,9 @@ protected:
 
 	int Width, Height;
 
-	std::vector<std::pair<const char*, TransformComponent* const>> ObjectsToRender;
+	std::vector<std::pair<std::string, TransformComponent* const>> ObjectsToRender;
 
-	std::map<const char*, Mesh*> RegisteredModels;
+	std::map<std::string, Mesh*> RegisteredModels;
 
 	bool bMultithreaded;
 };

@@ -41,7 +41,6 @@ public:
 
 	void NextScreenBuffer()
 	{
-		//std::lock_guard<std::mutex> lg(DoubleBufferMtx);
 		PreviousScreenBufferIndex = CurrentScreenBufferIndex;
 		++CurrentScreenBufferIndex;
 		if (CurrentScreenBufferIndex >= SCREEN_BUFFER_COUNT)
@@ -49,15 +48,23 @@ public:
 			CurrentScreenBufferIndex = 0;
 		}
 	}
+
 	wchar_t* GetCurrentScreenBuffer() const
 	{
-		//std::lock_guard<std::mutex> lg(DoubleBufferMtx);
 		return ScreenBuffers[CurrentScreenBufferIndex];
 	}
 	wchar_t* GetPreviousScreenBuffer() const
 	{
-		//std::lock_guard<std::mutex> lg(DoubleBufferMtx);
 		return ScreenBuffers[PreviousScreenBufferIndex];
+	}
+
+	WORD* GetCurrentColourBuffer() const
+	{
+		return ColourBuffers[CurrentScreenBufferIndex];
+	}
+	WORD* GetPreviousColourBuffer() const
+	{
+		return ColourBuffers[PreviousScreenBufferIndex];
 	}
 
 protected:
@@ -67,6 +74,7 @@ protected:
 	std::mutex DoubleBufferMtx;
 
 	wchar_t* ScreenBuffers[SCREEN_BUFFER_COUNT];
+	WORD* ColourBuffers[SCREEN_BUFFER_COUNT];
 
 	float* DepthData;
 	std::vector<unsigned int> ImageHorizontalIter, ImageVerticalIter;

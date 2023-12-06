@@ -6,8 +6,9 @@
 unsigned int Object::sObjectIDCount = 0;
 OBJECT_MAP Object::sObjectList;
 
-Object::Object()
-	: bActive(true)
+Object::Object(Object* _parent /*= nullptr*/)
+	: Parent(_parent)
+	, bActive(true)
 	, _Transform(new TransformComponent(this))
 {
 	ObjectID = sObjectIDCount;

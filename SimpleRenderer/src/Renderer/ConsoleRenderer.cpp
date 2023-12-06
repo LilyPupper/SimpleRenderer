@@ -26,17 +26,21 @@ ConsoleRenderer::ConsoleRenderer(const unsigned int _width, const unsigned int _
 	CurrentScreenBufferIndex = 0;
 	PreviousScreenBufferIndex = 0;
 
-	for (unsigned int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
+	for (int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
 	{
 		ScreenBuffers[i] = new wchar_t[_width * _height];
+	}
+	for (int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
+	{
+		ColourBuffers[i] = new WORD[_width * _height];
 	}
 	DepthData = new float[_width * _height];
 
 	ImageHorizontalIter.resize(_width);
 	ImageVerticalIter.resize(_height);
-	for (unsigned int i = 0; i < _width; ++i)
+	for (int i = 0; i < _width; ++i)
 		ImageHorizontalIter[i] = i;
-	for (unsigned int i = 0; i < _height; ++i)
+	for (int i = 0; i < _height; ++i)
 		ImageVerticalIter[i] = i;
 
 	Futures.resize(std::thread::hardware_concurrency());
@@ -78,14 +82,18 @@ ConsoleRenderer::~ConsoleRenderer()
 {
 	bRenderThreadContinue = false;
 
-	for (std::map<const char*, Mesh*>::iterator itr = RegisteredModels.begin(); itr != RegisteredModels.end(); itr++)
+	for (std::map<std::string, Mesh*>::iterator itr = RegisteredModels.begin(); itr != RegisteredModels.end(); itr++)
 	{
 		delete itr->second;
 	}
 
-	for (unsigned int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
+	for (int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
 	{
 		delete[] ScreenBuffers[i];
+	}
+	for (int i = 0; i < SCREEN_BUFFER_COUNT; ++i)
+	{
+		delete[] ColourBuffers[i];
 	}
 	delete[] DepthData;
 }
@@ -100,6 +108,7 @@ bool ConsoleRenderer::InitialiseConsoleWindow()
 	{
 		CONSOLE_FONT_INFOEX fontInfo;
 		fontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
+		fontInfo.FontWeight = 1000; // Bold font
 		if (GetCurrentConsoleFontEx(hStdOut, FALSE, &fontInfo))
 		{
 			// The console window seems to size itself correctly when the width and height are below the following values
@@ -130,12 +139,13 @@ bool ConsoleRenderer::InitialiseConsoleWindow()
 				fontInfo.dwFontSize.X = 16;
 				fontInfo.dwFontSize.Y = 16;
 			}
-	
+
 			if (!SetCurrentConsoleFontEx(hStdOut, FALSE, &fontInfo))
 			{
 				std::cerr << "CreateConsoleScreenBuffer win error: " << GetLastError() << '\n';
 				return false;
 			}
+			SetConsoleTextAttribute(hStdOut, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
 		}
 	}
 
@@ -176,7 +186,6 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 		PrintToFile();
 	}
 
-
 	const TransformComponent* cameraTransform = Camera::Main->GetTransform();
 	if (!cameraTransform)
 	{
@@ -184,9 +193,11 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 	}
 
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
+	WORD* currentColourBuffer = GetCurrentColourBuffer();
 
 	// Reset depth texture
 	std::fill_n(currentImageData, Width * Height, L' ');
+	std::fill_n(currentColourBuffer, Width * Height, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 	std::fill_n(DepthData, Width * Height, std::numeric_limits<float>::max());
 
 	if (bMultithreaded)
@@ -231,19 +242,19 @@ void ConsoleRenderer::Render(const float& _deltaTime)
 
 	ObjectsToRender.clear();
 
-	if(!bIsScreenBufferReady)
+	while(!bIsScreenBufferReady)
 	{
 		bIsScreenBufferReady = true;
 		NextScreenBuffer();
 	}
-
-	//Sleep(1);
 }
 
 void ConsoleRenderer::PushToScreen(const float& _deltaTime)
 {
-	DWORD dwBytesWritten;
-	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwBytesWritten);
+	//DWORD dwColoursWritten;
+	//WriteConsoleOutputAttribute(Console, GetPreviousColourBuffer(), Width * Height, {0, 0}, &dwColoursWritten);
+	DWORD dwCharactersWritten;
+	WriteConsoleOutputCharacter(Console, GetPreviousScreenBuffer(), Width * Height, { 0,0 }, &dwCharactersWritten);
 }
 
 void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _transform)
@@ -264,6 +275,7 @@ void ConsoleRenderer::RasterizeTri(const Tri& _tri, TransformComponent* const _t
 void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSpaceTri, TransformComponent* const _transform)
 {
 	wchar_t* currentImageData = GetCurrentScreenBuffer();
+	WORD* currentColourData = GetCurrentColourBuffer();
 
 	Tri worldSpaceTri = _tri * _transform->GetTransformation();
 	worldSpaceTri.RecalculateSurfaceNormal();
@@ -379,6 +391,7 @@ void ConsoleRenderer::DrawTriangleToScreen(const Tri& _tri, const Tri& _screenSp
 
 
 				currentImageData[drawIndex] = CharacterToDraw;
+				currentColourData[drawIndex] = _tri.Colour;
 				DepthData[drawIndex] = fz;
 			}
 			stepCount++;

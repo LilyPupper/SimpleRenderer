@@ -9,6 +9,7 @@ class RendererBase;
 
 struct ObjectDefinition
 {
+	Object* Parent;
 	std::string ModelPath;
 };
 

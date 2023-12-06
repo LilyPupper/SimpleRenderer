@@ -5,7 +5,7 @@
 class RotatingModel : public Object
 {
 public:
-	RotatingModel();
+	RotatingModel(Object* _parent = nullptr);
 	~RotatingModel();
 
 	static ObjectType GetObjectType() { return ObjectType::RotatingMonkey; }
